@@ -1,6 +1,9 @@
-Registro escolar es una aplicación para controlar el registro demógrafico y la matrícula de estudiantes en centros educativos de El Salvador.
-El software está escrito en Django 3.1 y hace un uso extensivo de Django Admin
+Registro escolar es una aplicación para controlar el registro demógrafico y la matrícula de estudiantes en centros educativos de El Salvador acorde a los requerimientos del MINED
 
-El programa está registrado bajo licencia GPL 2.
+El software está escrito en Django 3.1 y hace un uso intensivo de Django Admin en general
 
-Para utilizarlos simplemente clonar el repositorio e instalar los requerimientos a través de pipenv(no existe soporte para pip en el archivo.) Luego se inicia el servidor
+Para utilizarlos simplemente clonar el repositorio e instalar los requerimientos a través de pipenv(no existe soporte para pip en el archivo.) e iniciar el servidor, se requiere un conocimiento significativo de Django para ponerlo en funcionamiento en producción, puede seguir la documentación de Django: https://docs.djangoproject.com/en/3.1/ 
+
+Se brinda este programa de forma libre y gratuita bajo licencia GPL3. https://www.gnu.org/licenses/gpl-3.0.txt
+
+No brindamos ningún tipo de soporte y no respondemos por errores, pérdida de datos o problemas en computadoras que tengan relación con la instalción y uso de este sistema. Si desea soporte comercial puede contactarnos.
