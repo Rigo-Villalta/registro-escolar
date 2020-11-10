@@ -95,7 +95,7 @@ class EstudianteAdmin(admin.ModelAdmin, ExportCsvMixin):
                 "responsable", "estudiantes_en_la_misma_casa",]
         }),
     )
-    actions = ["exportar_a_excel"]
+    actions = ["exportar_a_excel", "exportar_a_excel_basico"]
     
 
 admin.site.register(Departamento)
