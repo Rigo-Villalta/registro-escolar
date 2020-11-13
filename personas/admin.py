@@ -1,6 +1,10 @@
-from django.contrib import admin
+import codecs
+import csv
 
-from .mixins import ExportCsvMixin
+from django.contrib import admin
+from django.http import HttpResponse
+
+from .actions import export_as_csv_action
 from .models import (
     Departamento,
     Estudiante,
@@ -36,21 +40,21 @@ class EstudiantesMenoresAdminInline(admin.TabularInline):
     extra = 0
 
 
-class EstudianteAdmin(admin.ModelAdmin, ExportCsvMixin):
+class EstudianteAdmin(admin.ModelAdmin):
     list_display = ["__str__", "grado_matriculado", "seccion"]
     list_filter = ["grado_matriculado", "seccion"]
     search_fields = ["nombre", "apellidos"]
     autocomplete_fields = [
-         "familiares", "estudiantes_en_la_misma_casa", 
-         "responsable", "menores_cohabitantes"]
+        "familiares", "estudiantes_en_la_misma_casa",
+        "responsable", "menores_cohabitantes"]
     inlines = [EstudiantesMenoresAdminInline, FamiliaAdminInline]
     ordering = ["grado_matriculado", "seccion", "apellidos", "nombre"]
     fieldsets = (
         ("Datos básicos del estudiante", {
             'fields': [
-                "nombre", "apellidos", "sexo", 
+                "nombre", "apellidos", "sexo",
                 "posee_partida", "fecha_de_nacimiento",
-                "nacionalidad", "municipio_de_nacimiento", "estado_civil",]
+                "nacionalidad", "municipio_de_nacimiento", "estado_civil", ]
         }),
         ("Información de contacto", {
             'fields': [
@@ -59,8 +63,8 @@ class EstudianteAdmin(admin.ModelAdmin, ExportCsvMixin):
         }),
         ("Información escolar", {
             'fields': [
-                 "nie", "escuela_previa", "seccion_previa",
-                 "grado_matriculado", "seccion"]
+                "nie", "escuela_previa", "seccion_previa",
+                "grado_matriculado", "seccion"]
         }),
         ("Información complementaria", {
             'fields': [
@@ -69,7 +73,7 @@ class EstudianteAdmin(admin.ModelAdmin, ExportCsvMixin):
         ("Información sobre movilidad ciudadana", {
             'fields': [
                 "utiliza_vehiculo",
-                "utiliza_transporte_publico", "camina_a_la_escuela", 
+                "utiliza_transporte_publico", "camina_a_la_escuela",
                 "otro_medio_de_transporte", "distancia", ]
         }),
         ("Información de salud, seleccione cualquier condición que padezca el estudiante.", {
@@ -83,20 +87,40 @@ class EstudianteAdmin(admin.ModelAdmin, ExportCsvMixin):
         ("Servicios básicos y comunicaciones.", {
             'fields': [
                 "fuente_de_agua", "piso", "tipo_de_sanitario",
-                "posee_energia", "posee_refrigerador", "posee_televisor", 
-                "posee_celular_con_acceso_a_internet", 
-                "posee_radio", "posee_computadora", "posee_tablet", 
-                "internet_residencial", "compania_internet", 
+                "posee_energia", "posee_refrigerador", "posee_televisor",
+                "posee_celular_con_acceso_a_internet",
+                "posee_radio", "posee_computadora", "posee_tablet",
+                "internet_residencial", "compania_internet",
             ]
         }),
         ("Situación familiar", {
             'fields': [
                 "cantidad_cohabitantes", "menores_en_casa",
-                "responsable", "estudiantes_en_la_misma_casa",]
+                "responsable", "estudiantes_en_la_misma_casa", ]
         }),
     )
-    actions = ["exportar_a_excel", "exportar_a_excel_basico"]
-    
+    actions = [export_as_csv_action("Exportar a Excel datos básicos", fields=[
+                                    "nombre", "apellidos", "nie", "seccion", "sexo"])]
+
+    def exportar_a_excel_basico(self, request, queryset):
+        meta = self.model._meta
+        field_names = ["nombre", "apellidos", "seccion"]
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename={}.csv'.format(
+            meta)
+        writer = csv.writer(response)
+
+        response.write(codecs.BOM_UTF8)
+        writer.writerow(["nombre", "apellidos", "sección", "nie", "sexo"])
+        for obj in queryset:
+            row = writer.writerow([getattr(obj, field)
+                                   for field in field_names])
+
+        return response
+
+    exportar_a_excel_basico.short_description = "Exportar a excel básico"
+
 
 admin.site.register(Departamento)
 admin.site.register(Estudiante, EstudianteAdmin)
