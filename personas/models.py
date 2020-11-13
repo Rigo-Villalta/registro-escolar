@@ -307,6 +307,7 @@ class Estudiante(Persona):
         through="EstudiantesYMenores",
         through_fields=("estudiante", "menor_de_edad")
     )
+    activo = models.BooleanField(help_text="Desmarcar si el estudiante retira documentos", default=True)
 
     def __str__(self):
         return f'{self.apellidos}, {self.nombre} '

@@ -69,6 +69,15 @@ class Seccion(models.Model):
         max_length=1,
         choices=SECCION_CHOICES,
         default="A")
+    
+    def estudiantes(self):
+        return self.estudiante_set.all().count()
+    
+    def masculino(self):
+        return self.estudiante_set.filter(sexo='M').count()
+    
+    def femenino(self):
+        return self.estudiante_set.filter(sexo='F').count()
 
     def __str__(self):
         return f'{self.nivel_educativo} sección "{self.seccion}""'

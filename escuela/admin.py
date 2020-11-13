@@ -12,7 +12,7 @@ class NivelEducativoAdmin(admin.ModelAdmin):
 
 
 class SeccionAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "periodo_escolar")
+    list_display = ("__str__", "estudiantes", 'femenino', 'masculino')
     ordering = ["periodo_escolar__fecha_de_cierre", "nivel_educativo__edad_normal_de_ingreso"]
 
 

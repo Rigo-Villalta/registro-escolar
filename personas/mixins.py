@@ -45,3 +45,4 @@ class ExportCsvMixin:
             row = writer.writerow([getattr(obj, field) for field in field_names])
         
         return response
+    exportar_a_excel_basico.short_description = "Exportar a excel básico"
