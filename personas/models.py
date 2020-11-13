@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 
 from escuela.models import Escuela, Seccion, NivelEducativo
@@ -25,7 +27,7 @@ class Persona(models.Model):
     apellidos = models.CharField(max_length=40)
     SEXO_CHOICES = [("M", "Masculino"), ("F", "Femenino")]
     sexo = models.CharField(max_length=1, choices=SEXO_CHOICES, default="F")
-    fecha_de_nacimiento = models.DateField()
+    fecha_de_nacimiento = models.DateField(validators=[validate_date_is_past])
     telefono_1 = models.CharField(
         verbose_name="Teléfono de contacto 1",
         max_length=20,
@@ -38,7 +40,13 @@ class Persona(models.Model):
     )
     correo_electronico = models.EmailField(
         verbose_name="Correo electrónico personal", blank=True, null=True)
-
+    
+    def edad(self):
+        hoy = datetime.date.today()
+        diferencia_fechas = hoy - self.fecha_de_nacimiento
+        edad = int(diferencia_fechas.days / 365.25)
+        return edad
+        
     class Meta:
         abstract = True
 

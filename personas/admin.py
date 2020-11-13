@@ -41,14 +41,14 @@ class EstudiantesMenoresAdminInline(admin.TabularInline):
 
 
 class EstudianteAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "grado_matriculado", "seccion"]
+    list_display = ["__str__", "grado_matriculado", "seccion", "edad", "sexo"]
+    ordering = ["grado_matriculado__edad_normal_de_ingreso", "seccion", "apellidos", "nombre"]
     list_filter = ["grado_matriculado", "seccion"]
     search_fields = ["nombre", "apellidos"]
     autocomplete_fields = [
         "familiares", "estudiantes_en_la_misma_casa",
         "responsable", "menores_cohabitantes"]
     inlines = [EstudiantesMenoresAdminInline, FamiliaAdminInline]
-    ordering = ["grado_matriculado", "seccion", "apellidos", "nombre"]
     fieldsets = (
         ("Datos básicos del estudiante", {
             'fields': [
