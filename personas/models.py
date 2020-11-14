@@ -118,10 +118,10 @@ class Estudiante(Persona):
         max_length=1,
         choices=(
             ("A", "A"), ("B", "B"), ("C", "C"),
-            ("D", "D"), ("E", "E")
+            ("D", "D"), ("E", "E"), ('N', "Nuevo ingreso")
         ),
         blank=True,
-        help_text="Solo si estudió en esta institución(CEDHRA) el año escolar anterior"
+        help_text="Si el estudiante proviene de otra institución o no estudió el año escolar anterior seleccione nuevo ingreso."
     )
     grado_matriculado = models.ForeignKey(
         NivelEducativo,
