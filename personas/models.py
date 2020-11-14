@@ -61,11 +61,13 @@ class Responsable(Persona):
         EMPRESARIO = "M", "Empresario"
         PROFESIONAL = "P", "Profesional autónomo"
 
-    dui = models.CharField(verbose_name="DUI", max_length=12, unique=True)
+    dui = models.CharField(verbose_name="DUI", max_length=25, unique=True)
     situacion_laboral = models.CharField(
         max_length=20, verbose_name="Situación Laboral", default="D", choices=SituacionLaboral.choices)
     direccion_de_residencia = models.CharField(
         max_length=200, blank=True, null=True)
+    observaciones = models.TextField(help_text="Ingrese información adicional relevante, como uso de otros documentos que no son DUI o alguna particularidad", blank=True, null=True)
+
 
     def __str__(self):
         return f'{self.apellidos}, {self.nombre}'
