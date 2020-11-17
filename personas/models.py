@@ -4,6 +4,7 @@ from django.db import models
 
 from escuela.models import Escuela, Seccion, NivelEducativo
 
+from .helpers import normalizar_nombre_propio
 from .validators import validate_date_is_past
 
 
@@ -46,6 +47,11 @@ class Persona(models.Model):
         diferencia_fechas = hoy - self.fecha_de_nacimiento
         edad = int(diferencia_fechas.days / 365.25)
         return edad
+    
+    def save(self, *args, **kwargs ):
+        self.nombre = normalizar_nombre_propio(self.nombre)
+        self.apellidos = normalizar_nombre_propio(self.apellidos)
+        super().save(*args, **kwargs)
         
     class Meta:
         abstract = True
