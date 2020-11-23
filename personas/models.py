@@ -86,7 +86,7 @@ class MenorDeEdad(models.Model):
     """
     nombre = models.CharField(max_length=40)
     apellidos = models.CharField(max_length=40)
-    fecha_de_nacimiento = models.DateField(validators=[validate_date_is_past])
+    fecha_de_nacimiento = models.DateField(validators=[validate_date_is_past], blank=True, null=True)
     estudia = models.BooleanField(verbose_name="¿El menor estudia?",)
     institucion_educativa = models.ForeignKey(
         Escuela,
