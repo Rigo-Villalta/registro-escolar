@@ -13,7 +13,7 @@ def secciones_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
 
-    secciones = Seccion.objects.all().order_by('nivel_educativo__edad_normal_de_ingreso', 'seccion')
+    secciones = Seccion.objects.all().order_by('nivel_educativo__edad_normal_de_ingreso', 'nivel_educativo', 'seccion')
 
     response.write(codecs.BOM_UTF8)
     writer = csv.writer(response)
