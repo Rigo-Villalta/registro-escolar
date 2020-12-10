@@ -7,7 +7,7 @@ class EscuelaAdmin(admin.ModelAdmin):
 
 
 class NivelEducativoAdmin(admin.ModelAdmin):
-    list_display = ("nivel", "edad_de_ingreso_al_nivel")
+    list_display = ("nivel", "edad_de_ingreso_al_nivel", "masculino", "femenino", "estudiantes")
     ordering = ["edad_normal_de_ingreso"]
 
 

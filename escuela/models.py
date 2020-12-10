@@ -20,6 +20,24 @@ class NivelEducativo(models.Model):
             MinValueValidator(2),
             MaxValueValidator(18),
         ])
+    
+    def estudiantes(self):
+        total_estudiantes = 0
+        for seccion in self.seccion_set.all():
+            total_estudiantes += seccion.estudiante_set.all().count()
+        return total_estudiantes
+    
+    def masculino(self):
+        total_masculino = 0
+        for seccion in self.seccion_set.all():
+            total_masculino += seccion.estudiante_set.filter(sexo='M').count()
+        return total_masculino
+    
+    def femenino(self):
+        total_femenino = 0;
+        for seccion in self.seccion_set.all():
+            total_femenino += seccion.estudiante_set.filter(sexo='F').count()
+        return total_femenino
 
     def __str__(self):
         return self.nivel
