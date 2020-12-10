@@ -30,6 +30,7 @@ def grados_csv(request):
 
     grados = NivelEducativo.objects.all()
 
+    response.write(codecs.BOM_UTF8)
     writer = csv.writer(response)
     writer.writerow(['Grado', 'Femenino', 'Masculino', 'Estudiantes'])
     for obj in grados:
