@@ -13,7 +13,7 @@ def secciones_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
 
-    secciones = Seccion.objects.all()
+    secciones = Seccion.objects.all().order_by('nivel_educativo__edad_normal_de_ingreso', 'seccion')
 
     response.write(codecs.BOM_UTF8)
     writer = csv.writer(response)
@@ -28,7 +28,7 @@ def grados_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
 
-    grados = NivelEducativo.objects.all()
+    grados = NivelEducativo.objects.all().order_by('edad_normal_de_ingreso')
 
     response.write(codecs.BOM_UTF8)
     writer = csv.writer(response)
