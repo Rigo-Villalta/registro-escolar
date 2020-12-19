@@ -102,25 +102,6 @@ class EstudianteAdmin(admin.ModelAdmin):
     actions = [export_as_csv_action("Exportar a Excel datos básicos", fields=[
                                     "nombre", "apellidos", "nie", "seccion", "sexo"])]
 
-    def exportar_a_excel_basico(self, request, queryset):
-        meta = self.model._meta
-        field_names = ["nombre", "apellidos", "seccion"]
-
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename={}.csv'.format(
-            meta)
-        writer = csv.writer(response)
-
-        response.write(codecs.BOM_UTF8)
-        writer.writerow(["nombre", "apellidos", "sección", "nie", "sexo"])
-        for obj in queryset:
-            row = writer.writerow([getattr(obj, field)
-                                   for field in field_names])
-
-        return response
-
-    exportar_a_excel_basico.short_description = "Exportar a excel básico"
-
 
 admin.site.register(Departamento)
 admin.site.register(Estudiante, EstudianteAdmin)
