@@ -1,2 +1,5 @@
 *.pyc
 *.vscode
+*.sqlite3
+*.backup
+settings_local.py
