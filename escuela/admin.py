@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from .models import Escuela, NivelEducativo, Seccion, PeriodoEscolar
 
@@ -12,8 +12,8 @@ class NivelEducativoAdmin(admin.ModelAdmin):
     list_display = (
         "nivel",
         "edad_de_ingreso_al_nivel",
-        "masculino",
         "femenino",
+        "masculino",
         "estudiantes",
     )
     ordering = ["edad_normal_de_ingreso"]
@@ -22,8 +22,8 @@ class NivelEducativoAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         queryset = queryset.annotate(
             _total_estudiantes=Count("seccion__estudiante", distinct=True),
-            _total_femenino=Count("seccion__estudiante", distinct=True, sexo="F"),
-            _total_masculino=Count("seccion__estudiante", distinct=True, sexo="M"),
+            _total_femenino=Count("seccion__estudiante", filter=Q(seccion__estudiante__sexo="F")),
+            _total_masculino=Count("seccion__estudiante", filter=Q(seccion__estudiante__sexo="M")),
         )
         return queryset
 
@@ -39,7 +39,7 @@ class NivelEducativoAdmin(admin.ModelAdmin):
 
 @admin.register(Seccion)
 class SeccionAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "estudiantes", "femenino", "masculino")
+    list_display = ("__str__", "femenino", "masculino", "estudiantes")
     ordering = [
         "periodo_escolar__fecha_de_cierre",
         "nivel_educativo__edad_normal_de_ingreso",
@@ -50,8 +50,8 @@ class SeccionAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         queryset = queryset.annotate(
             _total_estudiantes=Count("estudiante", distinct=True),
-            _total_femenino=Count("estudiante", distinct=True, sexo="F"),
-            _total_masculino=Count("estudiante", distinct=True, sexo="M"),
+            _total_femenino=Count("estudiante", filter=Q(estudiante__sexo="F")),
+            _total_masculino=Count("estudiante", filter=Q(estudiante__sexo="M")),
         )
         return queryset
 
