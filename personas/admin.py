@@ -96,7 +96,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         ("Situación familiar", {
             'fields': [
                 "cantidad_cohabitantes", "menores_en_casa",
-                "responsable", "estudiantes_en_la_misma_casa", ]
+                "responsable", "relacion_de_responsable", "estudiantes_en_la_misma_casa", ]
         }),
     )
     actions = [export_as_csv_action("Exportar a Excel datos básicos", fields=[

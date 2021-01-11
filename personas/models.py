@@ -8,6 +8,15 @@ from .helpers import normalizar_nombre_propio
 from .validators import validate_date_is_past
 
 
+class Relacion(models.TextChoices):
+        PADRE = "P", "Padre"
+        MADRE = "M", "Madre"
+        TIO = "T", "Tío/Tía"
+        ABUELO = "A", "Abuelo/Abuela"
+        HERMANO = "H", "Hermano/Hermana"
+        OTROS = "O", "Otros"
+
+
 class Departamento(models.Model):
     nombre = models.CharField(max_length=25)
 
@@ -306,6 +315,9 @@ class Estudiante(Persona):
         Responsable, related_name="responsable_de",
         help_text="Persona autorizada a hacer trámites del estudiantes.",
         on_delete=models.SET_NULL, blank=True, null=True)
+    relacion_de_responsable = models.CharField(max_length=1,
+    verbose_name="Relación familiar de responsable con estudiante.",
+     choices=Relacion.choices, default=Relacion.MADRE)
     familiares = models.ManyToManyField(Responsable, through="Familia")
     estudiantes_en_la_misma_casa = models.ManyToManyField(
         'self',
@@ -333,14 +345,6 @@ class Familia(models.Model):
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
     familiar = models.ForeignKey(
         Responsable, on_delete=models.CASCADE, help_text="Seleccione un familiar para el estudiante")
-
-    class Relacion(models.TextChoices):
-        PADRE = "P", "Padre"
-        MADRE = "M", "Madre"
-        TIO = "T", "Tío/Tía"
-        ABUELO = "A", "Abuelo/Abuela"
-        HERMANO = "H", "Hermano/Hermana"
-        OTROS = "O", "Otros"
 
     relacion = models.CharField(
         verbose_name="Relación",
