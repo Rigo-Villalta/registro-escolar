@@ -28,6 +28,7 @@ class FamiliaAdminInline(admin.TabularInline):
 
 class ResponsableAdmin(admin.ModelAdmin):
     search_fields = ["nombre", "apellidos"]
+    list_display = ["__str__", "dui"]
 
 
 class MenorDeEdadAdmin(admin.ModelAdmin):
