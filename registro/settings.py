@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-JQUERY_URL = "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.min.js"
+USE_DJANGO_JQUERY = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
