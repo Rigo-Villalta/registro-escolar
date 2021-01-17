@@ -21,6 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Application definition
 
 INSTALLED_APPS = [
+    'smart_selects',
     'disciplina.apps.DisciplinaConfig',
     'escuela.apps.EscuelaConfig',
     "personas.apps.PersonasConfig",
@@ -31,6 +32,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+JQUERY_URL = "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.min.js"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
