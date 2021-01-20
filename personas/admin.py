@@ -26,9 +26,16 @@ class FamiliaAdminInline(admin.TabularInline):
     extra = 0
 
 
+class EstudianteInline(admin.TabularInline):
+    model = Estudiante
+    fields = ["apellidos", "nombre"]
+    extra = 0
+
+
 class ResponsableAdmin(admin.ModelAdmin):
     search_fields = ["nombre", "apellidos"]
     list_display = ["__str__", "dui"]
+    inlines = [EstudianteInline,]
 
 
 class MenorDeEdadAdmin(admin.ModelAdmin):
