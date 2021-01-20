@@ -26,14 +26,20 @@ class FamiliaAdminInline(admin.TabularInline):
     extra = 0
 
 
-class EstudianteInline(admin.TabularInline):
+class EstudianteInline(admin.StackedInline):
     model = Estudiante
-    fields = ["apellidos", "nombre", "seccion"]
+    fields = ["nombre", "apellidos", "seccion"]
     extra = 0
-    verbose_name = "Estdudiates a cargo"
+    verbose_name_plural = "Estudiantes a cargo"
     show_change_link = True
 
     def has_change_permission(self, request, obj):
+        return False
+
+    def has_delete_permission(self, request, obj):
+        return False
+    
+    def has_add_permission(self, request, obj):
         return False
 
 
