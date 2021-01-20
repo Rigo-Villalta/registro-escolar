@@ -28,8 +28,13 @@ class FamiliaAdminInline(admin.TabularInline):
 
 class EstudianteInline(admin.TabularInline):
     model = Estudiante
-    fields = ["apellidos", "nombre"]
+    fields = ["apellidos", "nombre", "seccion"]
     extra = 0
+    verbose_name = "Estdudiates a cargo"
+    show_change_link = True
+
+    def has_change_permission(self, request, obj):
+        return False
 
 
 class ResponsableAdmin(admin.ModelAdmin):

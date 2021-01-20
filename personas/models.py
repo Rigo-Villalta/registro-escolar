@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.urls import reverse
 from smart_selects.db_fields import ChainedForeignKey
 
 from escuela.models import Escuela, Seccion, NivelEducativo
@@ -387,6 +388,9 @@ class Estudiante(Persona):
 
     def __str__(self):
         return f"{self.apellidos}, {self.nombre} "
+    
+    def get_absolute_url(self):
+        return reverse("admin:personas_estudiante_change", args=(self.pk,)) 
 
 
 class Familia(models.Model):
