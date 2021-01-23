@@ -65,6 +65,7 @@ class EstudianteAdmin(admin.ModelAdmin):
     list_filter = ["grado_matriculado", "seccion"]
     search_fields = ["nombre", "apellidos"]
     autocomplete_fields = [
+        "municipio_de_residencia", "municipio_de_nacimiento", "escuela_previa",
         "familiares", "estudiantes_en_la_misma_casa",
         "responsable", "menores_cohabitantes"]
     inlines = [EstudiantesMenoresAdminInline, FamiliaAdminInline]
@@ -122,9 +123,14 @@ class EstudianteAdmin(admin.ModelAdmin):
                                     "nombre", "apellidos", "nie", "seccion", "sexo"])]
 
 
+
+class MunicipioAdmin(admin.ModelAdmin):
+    search_fields = ["nombre"]
+    ordering = ["id"]
+
 admin.site.register(Departamento)
 admin.site.register(Estudiante, EstudianteAdmin)
 admin.site.register(Familia, FamiliaAdmin)
-admin.site.register(Municipio)
+admin.site.register(Municipio, MunicipioAdmin)
 admin.site.register(Responsable, ResponsableAdmin)
 admin.site.register(MenorDeEdad, MenorDeEdadAdmin)

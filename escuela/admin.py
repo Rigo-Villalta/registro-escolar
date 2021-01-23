@@ -6,6 +6,7 @@ from .models import Escuela, NivelEducativo, Seccion, PeriodoEscolar
 
 class EscuelaAdmin(admin.ModelAdmin):
     list_display = ("nombre", "codigo")
+    search_fields = ["nombre"]
 
 
 class NivelEducativoAdmin(admin.ModelAdmin):
