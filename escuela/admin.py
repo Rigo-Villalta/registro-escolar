@@ -1,7 +1,26 @@
 from django.contrib import admin
 from django.db.models import Count, Q
 
+from personas.models import Estudiante
 from .models import Escuela, NivelEducativo, Seccion, PeriodoEscolar
+
+
+class EstudianteInline(admin.TabularInline):
+    model = Estudiante
+    fields = ["nombre", "apellidos", "sexo", "fecha_de_nacimiento"]
+    extra = 0
+    verbose_name_plural = "Estudiantes en la sección"
+    show_change_link = True
+    ordering = ["apellidos", "nombre"]
+
+    def has_change_permission(self, request, obj):
+        return False
+
+    def has_delete_permission(self, request, obj):
+        return False
+    
+    def has_add_permission(self, request, obj):
+        return False
 
 
 class EscuelaAdmin(admin.ModelAdmin):
@@ -46,6 +65,8 @@ class SeccionAdmin(admin.ModelAdmin):
         "nivel_educativo",
         "seccion",
     ]
+
+    inlines =[EstudianteInline,]
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
