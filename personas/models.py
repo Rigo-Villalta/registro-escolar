@@ -50,6 +50,7 @@ class Persona(models.Model):
         verbose_name="Correo electrónico personal", blank=True, null=True
     )
 
+    @property
     def edad(self):
         hoy = datetime.date.today()
         diferencia_fechas = hoy - self.fecha_de_nacimiento

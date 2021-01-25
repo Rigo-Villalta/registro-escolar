@@ -4,6 +4,8 @@ import csv
 from django.contrib import admin
 from django.http import HttpResponse
 
+from django_admin_listfilter_dropdown.filters import DropdownFilter, ChoiceDropdownFilter, RelatedDropdownFilter
+
 from .actions import export_as_csv_action
 from .models import (
     Departamento,
@@ -62,7 +64,13 @@ class EstudiantesMenoresAdminInline(admin.TabularInline):
 class EstudianteAdmin(admin.ModelAdmin):
     list_display = ["__str__", "grado_matriculado", "seccion", "edad", "sexo"]
     ordering = ["grado_matriculado__edad_normal_de_ingreso", "seccion", "apellidos", "nombre"]
-    list_filter = ["grado_matriculado", "seccion"]
+    list_filter =  (
+        ("sexo", ChoiceDropdownFilter),
+        ("grado_matriculado", RelatedDropdownFilter),
+        ("seccion", RelatedDropdownFilter)
+
+    )
+    #["grado_matriculado", "seccion"]
     search_fields = ["nombre", "apellidos"]
     autocomplete_fields = [
         "municipio_de_residencia", "municipio_de_nacimiento", "escuela_previa",
@@ -120,7 +128,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         }),
     )
     actions = [export_as_csv_action("Exportar a Excel datos básicos", fields=[
-                                    "nombre", "apellidos", "nie", "seccion", "sexo"])]
+                                    "nombre", "apellidos", "nie", "seccion", "sexo", "edad"])]
 
 
 
