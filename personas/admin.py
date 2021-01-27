@@ -62,8 +62,7 @@ class EstudiantesMenoresAdminInline(admin.TabularInline):
 
 
 class EstudianteAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "apellidos", "nombre", "grado_matriculado", "seccion", "edad"]
-    list_editable = ["apellidos", "nombre", "grado_matriculado", "seccion"]
+    list_display = ["__str__", "grado_matriculado", "seccion", "edad", "sexo"]
     ordering = ["grado_matriculado__edad_normal_de_ingreso", "seccion", "apellidos", "nombre"]
     list_filter =  (
         ("sexo", ChoiceDropdownFilter),
