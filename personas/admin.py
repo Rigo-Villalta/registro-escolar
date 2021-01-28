@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 from django_admin_listfilter_dropdown.filters import DropdownFilter, ChoiceDropdownFilter, RelatedDropdownFilter
 
-from .actions import export_as_csv_action
+from .actions import export_as_csv_action, exportar_a_excel_completo
 from .models import (
     Departamento,
     Estudiante,
@@ -128,7 +128,8 @@ class EstudianteAdmin(admin.ModelAdmin):
         }),
     )
     actions = [export_as_csv_action("Exportar a Excel datos básicos", fields=[
-                                    "nombre", "apellidos", "nie", "seccion", "sexo", "edad"])]
+                                    "nombre", "apellidos", "nie", "seccion", "sexo", "edad"]),
+                                    exportar_a_excel_completo]
 
 
 

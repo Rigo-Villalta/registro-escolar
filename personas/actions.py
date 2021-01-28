@@ -60,3 +60,21 @@ def export_as_csv_action(description="Export selected objects as CSV file", fiel
 
     export_as_csv.short_description = description
     return export_as_csv
+
+
+def exportar_a_excel_completo(self, request, queryset):
+    meta = self.model._meta
+    field_names = [field.name for field in meta.fields]
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename={}.csv'.format(
+        meta)
+    writer = csv.writer(response)
+
+    response.write(codecs.BOM_UTF8)
+    writer.writerow(field_names)
+    for obj in queryset:
+        row = writer.writerow([getattr(obj, field)
+                               for field in field_names])
+
+    return response
