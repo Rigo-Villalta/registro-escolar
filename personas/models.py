@@ -355,8 +355,7 @@ class Estudiante(Persona):
         Responsable,
         related_name="responsable_de",
         help_text="Persona autorizada a hacer trámites del estudiantes.",
-        on_delete=models.SET_NULL,
-        blank=True,
+        on_delete=models.PROTECT,
         null=True,
     )
     relacion_de_responsable = models.CharField(
