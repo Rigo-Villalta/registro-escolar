@@ -89,7 +89,7 @@ class Seccion(models.Model):
         return self.estudiante_set.filter(sexo="M").count()
 
     def __str__(self):
-        return f'{self.nivel_educativo} sección "{self.seccion}""'
+        return f'{self.nivel_educativo} sección "{self.seccion}"'
 
     class Meta:
         verbose_name = "Sección"
