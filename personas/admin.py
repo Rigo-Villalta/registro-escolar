@@ -11,10 +11,9 @@ from django_admin_listfilter_dropdown.filters import (
 )
 
 from .actions import (
-    exportar_a_excel_completo,
     exportar_datos_de_contacto_a_excel,
     exportar_datos_basicos_a_excel,
-    exportar_todos_los_datos_a_excel
+    exportar_todos_los_datos_a_excel,
 )
 
 from .models import (
@@ -214,7 +213,12 @@ class EstudianteAdmin(admin.ModelAdmin):
             },
         ),
     )
-    actions = [exportar_datos_basicos_a_excel, exportar_datos_de_contacto_a_excel, exportar_todos_los_datos_a_excel]
+    actions = [
+        exportar_datos_basicos_a_excel,
+        exportar_datos_de_contacto_a_excel,
+        exportar_todos_los_datos_a_excel,
+    ]
+
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel."
 

@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.db.models import Count, Q
 
 from personas.models import Estudiante
+from .actions import exportar_datos_de_secciones
 from .models import Escuela, NivelEducativo, Seccion, PeriodoEscolar
 
 
@@ -67,6 +68,7 @@ class SeccionAdmin(admin.ModelAdmin):
     ]
 
     inlines =[EstudianteInline,]
+    actions = [exportar_datos_de_secciones,]
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
