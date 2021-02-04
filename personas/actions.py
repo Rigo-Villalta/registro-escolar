@@ -6,6 +6,12 @@ from openpyxl import Workbook
 
 
 def exportar_todos_los_datos_a_excel(self, request, queryset):
+    """
+    Acción de Django Admin que exporta a Excel todos los datos del modelo
+    Estudiante, de todos los estudiantes en el queryset, haciendo uso de
+    la librería openpyxl ver: openpyxl.readthedocs.io
+    """
+
     meta = self.model._meta
     field_names = [field.name for field in meta.fields]
 
@@ -29,12 +35,16 @@ def exportar_todos_los_datos_a_excel(self, request, queryset):
         )
         response[
             "Content-Disposition"
-        ] = f'attachment; filename=DatosCompletosDeEstudiantes-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
+        ] = f'attachment; filename=Datos_completos_de_estudiantes-{datetime.datetime.now().strftime("%Y_%m_%d_%H-%M")}.xlsx'
         return response
 
 
 def exportar_datos_de_contacto_a_excel(self, request, queryset):
-
+    """
+    Acción de Django Admin que exporta a Excel datos de contacto del modelo
+    Estudiante, de todos los estudiantes en el queryset, haciendo uso de
+    la librería openpyxl ver: openpyxl.readthedocs.io
+    """
     wb = Workbook()
     ws = wb.active
     ws.title = "Estudiantes - contactos"
@@ -107,6 +117,11 @@ def exportar_datos_de_contacto_a_excel(self, request, queryset):
 
 
 def exportar_datos_basicos_a_excel(self, request, queryset):
+    """
+    Acción de Django Admin que exporta a Excel los datos básicos del modelo
+    Estudiante, de todos los estudiantes en el queryset, haciendo uso de
+    la librería openpyxl ver: openpyxl.readthedocs.io
+    """
 
     wb = Workbook()
     ws = wb.active

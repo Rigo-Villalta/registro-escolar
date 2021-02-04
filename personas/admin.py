@@ -30,6 +30,12 @@ from .models import (
 class FamiliaAdmin(admin.ModelAdmin):
     list_display = ["estudiante", "familiar", "relacion"]
 
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
+
 
 class FamiliaAdminInline(admin.TabularInline):
     model = Familia
@@ -63,9 +69,21 @@ class ResponsableAdmin(admin.ModelAdmin):
         EstudianteInline,
     ]
 
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
+
 
 class MenorDeEdadAdmin(admin.ModelAdmin):
     search_fields = ["nombre", "apellidos"]
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
 
 
 class EstudiantesMenoresAdminInline(admin.TabularInline):
@@ -219,6 +237,12 @@ class EstudianteAdmin(admin.ModelAdmin):
         exportar_todos_los_datos_a_excel,
     ]
 
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
+
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel."
 
@@ -226,6 +250,12 @@ exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a ex
 class MunicipioAdmin(admin.ModelAdmin):
     search_fields = ["nombre"]
     ordering = ["id"]
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
 
 
 admin.site.register(Departamento)

@@ -41,6 +41,24 @@ class NivelEducativo(models.Model):
         ],
     )
 
+    def total_estudiantes(self):
+        total = 0
+        for seccion in self.seccion_set.all():
+            total += seccion.estudiante_set.count()
+        return total
+    
+    def total_femenino(self):
+        total = 0
+        for seccion in self.seccion_set.all():
+            total += seccion.estudiante_set.filter(sexo="F").count()
+        return total
+    
+    def total_masculino(self):
+        total = 0
+        for seccion in self.seccion_set.all():
+            total += seccion.estudiante_set.filter(sexo="M").count()
+        return total
+
     def __str__(self):
         return self.nivel
 
@@ -62,7 +80,7 @@ class Seccion(models.Model):
     )
 
     def total_estudiantes(self):
-        return self.estudiante_set.all().count()
+        return self.estudiante_set.count()
     
     def total_femenino(self):
         return self.estudiante_set.filter(sexo="F").count()
