@@ -16,6 +16,10 @@ def exportar_datos_de_secciones(modeladmin, request, queryset):
     ws = wb.active
     ws.title = "Estadísticas de secciones"
     ws.append(["Sección", "Femenino", "Masculino", "Total"])
+    ws.column_dimensions["A"].width = 50.30
+    ws.column_dimensions["B"].width = 9.3
+    ws.column_dimensions["C"].width = 9.3
+    ws.column_dimensions["D"].width = 9.3
     count = 1
     for obj in queryset:
         ws.append(
@@ -63,6 +67,10 @@ def exportar_datos_de_grados(modeladmin, request, queryset):
     ws = wb.active
     ws.title = "Estadísticas de grados"
     ws.append(["Grado", "Femenino", "Masculino", "Total"])
+    ws.column_dimensions["A"].width = 50.30
+    ws.column_dimensions["B"].width = 9.3
+    ws.column_dimensions["C"].width = 9.3
+    ws.column_dimensions["D"].width = 9.3
     count = 1
     for obj in queryset:
         ws.append(
