@@ -106,7 +106,7 @@ def exportar_datos_de_contacto_a_excel(self, request, queryset):
                     obj.telefono_1,
                     obj.telefono_2,
                     obj.correo_electronico,
-                    responsable.__str__(),
+                    f"{responsable.nombre} {responsable.apellidos}",
                     obj.get_relacion_de_responsable_display(),
                     responsable.dui,
                     responsable.telefono_1,
