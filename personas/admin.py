@@ -65,6 +65,7 @@ class EstudianteInline(admin.StackedInline):
 class ResponsableAdmin(admin.ModelAdmin):
     search_fields = ["nombre", "apellidos", "dui"]
     list_display = ["__str__", "dui"]
+    ordering = ["apellidos", "nombre"]
     inlines = [
         EstudianteInline,
     ]
