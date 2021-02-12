@@ -385,6 +385,12 @@ class Estudiante(Persona):
     activo = models.BooleanField(
         help_text="Desmarcar si el estudiante retira documentos", default=True
     )
+    retirado = models.BooleanField(
+        help_text="Marcar si el estudiante se retira de la institución",
+        default=False,
+    )
+    fecha_de_retiro = models.DateField(blank=True, null=True)
+    motivo_de_retiro = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return f"{self.apellidos}, {self.nombre} "

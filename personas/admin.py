@@ -105,6 +105,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         ("sexo", ChoiceDropdownFilter),
         ("grado_matriculado", RelatedDropdownFilter),
         ("seccion", RelatedDropdownFilter),
+        "retirado"
     )
     # ["grado_matriculado", "seccion"]
     search_fields = ["nombre", "apellidos"]
@@ -231,6 +232,16 @@ class EstudianteAdmin(admin.ModelAdmin):
                 ]
             },
         ),
+        (
+            "Retiro de estudiantes",
+            {
+                "fields": [
+                    "retirado",
+                    "fecha_de_retiro",
+                    "motivo_de_retiro"
+                ]
+            },
+        ),
     )
     actions = [
         exportar_datos_basicos_a_excel,
@@ -243,6 +254,12 @@ class EstudianteAdmin(admin.ModelAdmin):
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions
+    
+    def get_queryset(self, request):
+        search = request.GET.get("retirado__exact")
+        if search:
+            return super().get_queryset(request)
+        return super().get_queryset(request).filter(retirado = False)
 
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel."
