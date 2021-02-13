@@ -262,6 +262,9 @@ class MunicipioAdmin(admin.ModelAdmin):
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("departamento")
 
 
 admin.site.register(Departamento)
