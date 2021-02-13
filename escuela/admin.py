@@ -92,7 +92,7 @@ class SeccionAdmin(admin.ModelAdmin):
     ]
 
     def get_queryset(self, request):
-        queryset = super().get_queryset(request)
+        queryset = super().get_queryset(request).prefetch_related("periodo_escolar", "nivel_educativo")
         queryset = queryset.annotate(
             _total_estudiantes=Count("estudiante", distinct=True),
             _total_femenino=Count("estudiante", filter=Q(estudiante__sexo="F")),
