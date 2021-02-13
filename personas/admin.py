@@ -10,6 +10,7 @@ from django_admin_listfilter_dropdown.filters import (
     RelatedDropdownFilter,
 )
 
+from escuela.models import Seccion, NivelEducativo
 from .actions import (
     exportar_datos_de_contacto_a_excel,
     exportar_datos_basicos_a_excel,
@@ -62,6 +63,22 @@ class EstudianteInline(admin.StackedInline):
         return False
 
 
+class SeccionFilter(admin.SimpleListFilter):
+    template = "django_admin_listfilter_dropdown/dropdown_filter.html"
+    title = "Filtrar por sección"
+    parameter_name = "seccion"
+
+    def lookups(self, request, model_admin):
+        secciones = Seccion.objects.prefetch_related(
+            "periodo_escolar", "nivel_educativo"
+        )
+        return [(seccion.id, str(seccion)) for seccion in secciones]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(seccion__id=self.value())
+
+
 class ResponsableAdmin(admin.ModelAdmin):
     search_fields = ["nombre", "apellidos", "dui"]
     list_display = ["__str__", "dui"]
@@ -104,8 +121,8 @@ class EstudianteAdmin(admin.ModelAdmin):
     list_filter = (
         ("sexo", ChoiceDropdownFilter),
         ("grado_matriculado", RelatedDropdownFilter),
-        ("seccion", RelatedDropdownFilter),
-        "retirado"
+        SeccionFilter,
+        "retirado",
     )
     # ["grado_matriculado", "seccion"]
     search_fields = ["nombre", "apellidos"]
@@ -234,13 +251,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         ),
         (
             "Retiro de estudiantes",
-            {
-                "fields": [
-                    "retirado",
-                    "fecha_de_retiro",
-                    "motivo_de_retiro"
-                ]
-            },
+            {"fields": ["retirado", "fecha_de_retiro", "motivo_de_retiro"]},
         ),
     )
     actions = [
@@ -254,12 +265,12 @@ class EstudianteAdmin(admin.ModelAdmin):
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions
-    
+
     def get_queryset(self, request):
         search = request.GET.get("retirado__exact")
         if search:
             return super().get_queryset(request)
-        return super().get_queryset(request).filter(retirado = False)
+        return super().get_queryset(request).filter(retirado=False)
 
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel."
