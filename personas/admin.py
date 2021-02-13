@@ -1,22 +1,15 @@
-import codecs
-import csv
-
 from django.contrib import admin
-from django.http import HttpResponse
-
 from django_admin_listfilter_dropdown.filters import (
-    DropdownFilter,
     ChoiceDropdownFilter,
     RelatedDropdownFilter,
 )
 
-from escuela.models import Seccion, NivelEducativo
 from .actions import (
     exportar_datos_de_contacto_a_excel,
     exportar_datos_basicos_a_excel,
     exportar_todos_los_datos_a_excel,
 )
-
+from .filters import SeccionFilter
 from .models import (
     Departamento,
     Estudiante,
@@ -61,22 +54,6 @@ class EstudianteInline(admin.StackedInline):
 
     def has_add_permission(self, request, obj):
         return False
-
-
-class SeccionFilter(admin.SimpleListFilter):
-    template = "django_admin_listfilter_dropdown/dropdown_filter.html"
-    title = "Filtrar por sección"
-    parameter_name = "seccion"
-
-    def lookups(self, request, model_admin):
-        secciones = Seccion.objects.prefetch_related(
-            "periodo_escolar", "nivel_educativo"
-        )
-        return [(seccion.id, str(seccion)) for seccion in secciones]
-
-    def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(seccion__id=self.value())
 
 
 class ResponsableAdmin(admin.ModelAdmin):
