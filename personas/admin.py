@@ -9,7 +9,7 @@ from .actions import (
     exportar_datos_basicos_a_excel,
     exportar_todos_los_datos_a_excel,
 )
-from .filters import SeccionFilter
+from .filters import SeccionFilter, NivelEducativoFilter
 from .models import (
     Departamento,
     Estudiante,
@@ -97,7 +97,7 @@ class EstudianteAdmin(admin.ModelAdmin):
     ]
     list_filter = (
         ("sexo", ChoiceDropdownFilter),
-        ("grado_matriculado", RelatedDropdownFilter),
+        NivelEducativoFilter,
         SeccionFilter,
         "retirado",
     )
@@ -247,7 +247,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         search = request.GET.get("retirado__exact")
         if search:
             return super().get_queryset(request)
-        return super().get_queryset(request).filter(retirado=False)
+        return super().get_queryset(request).prefetch_related("grado_matriculado").filter(retirado=False)
 
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel."
