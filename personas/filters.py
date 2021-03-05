@@ -16,7 +16,11 @@ class SeccionFilter(admin.SimpleListFilter):
         Aquí evitamos acceder a las llaves foraneas del model
         nos evitamos 1 consultas por cada instancia de Seccion
         """
-        return [(seccion.id, seccion.seccion) for seccion in Seccion.objects.all()]
+        search = request.GET.get("grado_matriculado__id__exact")
+        if search:
+            return [(seccion.id, seccion.__str__) for seccion in Seccion.objects.filter(nivel_educativo=search)]
+        else:
+            return [(seccion.id, seccion.__str__) for seccion in Seccion.objects.all()]
 
     def queryset(self, request, queryset):
         if self.value():
