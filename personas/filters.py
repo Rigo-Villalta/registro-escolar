@@ -22,10 +22,15 @@ class SeccionFilter(admin.SimpleListFilter):
         if search:
             return [
                 (seccion.id, seccion.__str__)
-                for seccion in Seccion.objects.filter(nivel_educativo=search).prefetch_related("nivel_educativo")
+                for seccion in Seccion.objects.filter(
+                    nivel_educativo=search
+                ).prefetch_related("nivel_educativo")
             ]
         else:
-            return [(seccion.id, seccion.__str__) for seccion in Seccion.objects.all().prefetch_related("nivel_educativo")]
+            return [
+                (seccion.id, seccion.__str__)
+                for seccion in Seccion.objects.all().prefetch_related("nivel_educativo")
+            ]
 
     def queryset(self, request, queryset):
         if self.value():

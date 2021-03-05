@@ -247,7 +247,12 @@ class EstudianteAdmin(admin.ModelAdmin):
         search = request.GET.get("retirado__exact")
         if search:
             return super().get_queryset(request)
-        return super().get_queryset(request).prefetch_related("grado_matriculado").filter(retirado=False)
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related("grado_matriculado")
+            .filter(retirado=False)
+        )
 
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel."
@@ -262,7 +267,7 @@ class MunicipioAdmin(admin.ModelAdmin):
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions
-    
+
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("departamento")
 
