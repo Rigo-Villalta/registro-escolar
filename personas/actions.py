@@ -52,6 +52,7 @@ def exportar_datos_de_contacto_a_excel(self, request, queryset):
         [
             "Apellidos",
             "Nombres",
+            "NIE",
             "Sexo",
             "Edad",
             "Sección",
@@ -68,18 +69,19 @@ def exportar_datos_de_contacto_a_excel(self, request, queryset):
     )
     ws.column_dimensions["A"].width = 17.60
     ws.column_dimensions["B"].width = 17.60
-    ws.column_dimensions["C"].width = 4.50
+    ws.column_dimensions["C"].width = 10
     ws.column_dimensions["D"].width = 4.50
-    ws.column_dimensions["E"].width = 31.00
-    ws.column_dimensions["F"].width = 9.4
+    ws.column_dimensions["E"].width = 4.50
+    ws.column_dimensions["F"].width = 31.00
     ws.column_dimensions["G"].width = 9.4
-    ws.column_dimensions["H"].width = 29.0
-    ws.column_dimensions["I"].width = 31.0
-    ws.column_dimensions["J"].width = 7.25
-    ws.column_dimensions["K"].width = 10.30
-    ws.column_dimensions["L"].width = 9.4
+    ws.column_dimensions["H"].width = 9.4
+    ws.column_dimensions["I"].width = 29.0
+    ws.column_dimensions["J"].width = 31.0
+    ws.column_dimensions["K"].width = 7.25
+    ws.column_dimensions["L"].width = 10.30
     ws.column_dimensions["M"].width = 9.4
-    ws.column_dimensions["N"].width = 29.0
+    ws.column_dimensions["N"].width = 9.4
+    ws.column_dimensions["O"].width = 29.0
     for obj in queryset:
         responsable = obj.responsable
         if responsable is None:
@@ -87,6 +89,7 @@ def exportar_datos_de_contacto_a_excel(self, request, queryset):
                 [
                     obj.apellidos,
                     obj.nombre,
+                    obj.nie,
                     obj.sexo,
                     obj.edad,
                     obj.seccion.__str__().title(),
@@ -100,6 +103,7 @@ def exportar_datos_de_contacto_a_excel(self, request, queryset):
                 [
                     obj.apellidos,
                     obj.nombre,
+                    obj.nie,
                     obj.sexo,
                     obj.edad,
                     obj.seccion.__str__().title(),
@@ -144,6 +148,7 @@ def exportar_datos_basicos_a_excel(self, request, queryset):
         [
             "Apellidos",
             "Nombres",
+            "NIE",
             "Sexo",
             "Edad",
             "Sección",
@@ -153,16 +158,18 @@ def exportar_datos_basicos_a_excel(self, request, queryset):
     )
     ws.column_dimensions["A"].width = 17.50
     ws.column_dimensions["B"].width = 19.20
-    ws.column_dimensions["C"].width = 4.50
+    ws.column_dimensions["C"].width = 10
     ws.column_dimensions["D"].width = 4.50
-    ws.column_dimensions["E"].width = 31.00
-    ws.column_dimensions["F"].width = 9.50
-    ws.column_dimensions["G"].width = 40.00
+    ws.column_dimensions["E"].width = 4.50
+    ws.column_dimensions["F"].width = 31.00
+    ws.column_dimensions["G"].width = 9.50
+    ws.column_dimensions["H"].width = 40.00
     for obj in queryset:
         ws.append(
             [
                 obj.apellidos,
                 obj.nombre,
+                obj.nie,
                 obj.sexo,
                 obj.edad,
                 obj.seccion.__str__().title(),
