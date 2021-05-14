@@ -245,7 +245,8 @@ class EstudianteAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         search = request.GET.get("retirado__exact")
-        if search:
+        change = request.GET.get("_changelist_filters")
+        if search or change:
             return super().get_queryset(request)
         return (
             super()
@@ -253,7 +254,6 @@ class EstudianteAdmin(admin.ModelAdmin):
             .prefetch_related("grado_matriculado")
             .filter(retirado=False)
         )
-
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel."
 
