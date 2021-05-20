@@ -191,3 +191,63 @@ def exportar_datos_basicos_a_excel(self, request, queryset):
             "Content-Disposition"
         ] = f'attachment; filename=ListaDeEstudiantes-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
         return response
+
+def exportar_responsables_y_estudiantes_ordenados_a_excel(self, request, queryset):
+    """
+    Acción que toma un queryset de Responsable y exporta
+    a excel las columnas: Responsable, DUI de responsable,
+    estudiante y sección del estudiante, haciendo uso de
+    la librería openpyxl ver: openpyxl.readthedocs.io
+    """
+
+    # optimización del queryset para los datos
+    # de estudiante relacionados y ordenados
+    qs = queryset.prefetch_related(
+        "responsable_de", "responsable_de__seccion__nivel_educativo"
+        ).order_by(
+            "responsable_de__seccion__nivel_educativo__edad_normal_de_ingreso",
+            "responsable_de__seccion", 
+            "responsable_de__apellidos"
+        )
+    responsables_usados = []
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Responsables - Estudiantes"
+    ws.append(
+        [
+            "Responsable",
+            "DUI de responsable",
+            "Estudiante",
+            "Sección"
+        ]
+    )
+    ws.column_dimensions["A"].width = 35
+    ws.column_dimensions["B"].width = 12
+    ws.column_dimensions["C"].width = 35
+    ws.column_dimensions["D"].width = 45
+    for obj in qs:
+        for estudiante in obj.responsable_de.all():
+            if obj.id not in responsables_usados:
+                ws.append(
+                    [
+                        obj.__str__(),
+                        obj.dui,
+                        estudiante.__str__(),
+                        estudiante.seccion.__str__()
+                    ]
+                )
+        responsables_usados.append(obj.id)
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+
+        response = HttpResponse(
+            content=stream,
+            content_type="application/ms-excel",
+        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename=ListaDeResponsablesEstudiantes-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
+        return response
