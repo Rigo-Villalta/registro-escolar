@@ -130,7 +130,7 @@ def exportar_datos_de_contacto_a_excel(self, request, queryset):
         )
         response[
             "Content-Disposition"
-        ] = f'attachment; filename=DatosDeContactoDeEstudiantes-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
+        ] = f'attachment; filename=DatosDeContactoDeEstudiantes-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
         return response
 
 
@@ -189,7 +189,7 @@ def exportar_datos_basicos_a_excel(self, request, queryset):
         )
         response[
             "Content-Disposition"
-        ] = f'attachment; filename=ListaDeEstudiantes-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
+        ] = f'attachment; filename=ListaDeEstudiantes-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
         return response
 
 def exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel(self, request, queryset):
@@ -249,7 +249,7 @@ def exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel(self, requ
         )
         response[
             "Content-Disposition"
-        ] = f'attachment; filename=ListaDeResponsablesEstudiantes-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
+        ] = f'attachment; filename=ListaDeResponsablesEstudiantes-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
         return response
 
 def exportar_a_excel_datos_completos_de_responsables(self, request, queryset):
@@ -317,5 +317,5 @@ def exportar_a_excel_datos_completos_de_responsables(self, request, queryset):
         )
         response[
             "Content-Disposition"
-        ] = f'attachment; filename=ListaDeResponsables-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
+        ] = f'attachment; filename=ListaDeResponsables-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
         return response
