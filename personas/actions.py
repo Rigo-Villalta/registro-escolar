@@ -227,7 +227,7 @@ def exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel(self, requ
     ws.column_dimensions["D"].width = 45
     for obj in qs:
         for estudiante in obj.responsable_de.all():
-            if obj.id not in responsables_usados:
+            if not estudiante.retirado and obj.id not in responsables_usados:
                 ws.append(
                     [
                         obj.__str__(),
