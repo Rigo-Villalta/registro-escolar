@@ -8,7 +8,8 @@ from .actions import (
     exportar_datos_de_contacto_a_excel,
     exportar_datos_basicos_a_excel,
     exportar_todos_los_datos_a_excel,
-    exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel
+    exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel,
+    exportar_a_excel_datos_completos_de_responsables
 )
 from .filters import SeccionFilter, NivelEducativoFilter
 from .models import (
@@ -64,7 +65,10 @@ class ResponsableAdmin(admin.ModelAdmin):
     inlines = [
         EstudianteInline,
     ]
-    actions = [exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel,]
+    actions = [
+        exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel,
+        exportar_a_excel_datos_completos_de_responsables
+        ]
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(

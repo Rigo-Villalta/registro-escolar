@@ -251,3 +251,71 @@ def exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel(self, requ
             "Content-Disposition"
         ] = f'attachment; filename=ListaDeResponsablesEstudiantes-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
         return response
+
+def exportar_a_excel_datos_completos_de_responsables(self, request, queryset):
+    """
+    Acción que toma un queryset de Responsable y exporta
+    a excel las columnas: Nombre, Apellidos, DUI, Sexo, Fecha de nacimiento,
+    teléfono 1 y 2, correo electrónico, Situación laboral, Dirección 
+    y observaciones, haciendo uso de
+    la librería openpyxl ver: openpyxl.readthedocs.io
+    """
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Responsables - Estudiantes"
+    ws.append(
+        [
+            "Apellidos",
+            "Nombre",
+            "DUI",
+            "Sexo",
+            "Nacimiento",
+            "Teléfono 1",
+            "Teléfono 2",
+            "Correo Electrónico",
+            "Situación Laboral",
+            "Dirección",
+            "Observaciones"
+        ]
+    )
+    ws.column_dimensions["A"].width = 20
+    ws.column_dimensions["B"].width = 20
+    ws.column_dimensions["C"].width = 11
+    ws.column_dimensions["D"].width = 9
+    ws.column_dimensions["E"].width = 11
+    ws.column_dimensions["F"].width = 10
+    ws.column_dimensions["G"].width = 10
+    ws.column_dimensions["H"].width = 30
+    ws.column_dimensions["I"].width = 16
+    ws.column_dimensions["J"].width = 65
+    ws.column_dimensions["K"].width = 65
+    for obj in queryset:
+        ws.append(
+            [
+                obj.apellidos,
+                obj.nombre,
+                obj.dui,
+                obj.get_sexo_display(),
+                obj.fecha_de_nacimiento,
+                obj.telefono_1,
+                obj.telefono_2,
+                obj.correo_electronico,
+                obj.get_situacion_laboral_display(),
+                obj.direccion_de_residencia,
+                obj.observaciones
+            ]
+        )
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+
+        response = HttpResponse(
+            content=stream,
+            content_type="application/ms-excel",
+        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename=ListaDeResponsables-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
+        return response
