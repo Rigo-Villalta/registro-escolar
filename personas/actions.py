@@ -192,7 +192,7 @@ def exportar_datos_basicos_a_excel(self, request, queryset):
         ] = f'attachment; filename=ListaDeEstudiantes-{datetime.datetime.now().strftime("%Y%m%d%H%M")}.xlsx'
         return response
 
-def exportar_responsables_y_estudiantes_ordenados_a_excel(self, request, queryset):
+def exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel(self, request, queryset):
     """
     Acción que toma un queryset de Responsable y exporta
     a excel las columnas: Responsable, DUI de responsable,
