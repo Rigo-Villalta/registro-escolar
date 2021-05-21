@@ -71,9 +71,7 @@ class ResponsableAdmin(admin.ModelAdmin):
         ]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).filter(
-            responsable_de__isnull=False
-            )
+        return super().get_queryset(request)
 
     def get_actions(self, request):
         actions = super().get_actions(request)
