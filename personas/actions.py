@@ -1,6 +1,8 @@
 import datetime
+from personas.models import Estudiante
 from tempfile import NamedTemporaryFile
 
+from django.db.models import Prefetch
 from django.http import HttpResponse
 from openpyxl import Workbook
 
@@ -192,74 +194,12 @@ def exportar_datos_basicos_a_excel(self, request, queryset):
         ] = f'attachment; filename=ListaDeEstudiantes-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
         return response
 
-def exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel(self, request, queryset):
-    """
-    Acción que toma un queryset de Responsable y exporta
-    a excel las columnas: Responsable, DUI de responsable,
-    estudiante y sección del estudiante, haciendo uso de
-    la librería openpyxl ver: openpyxl.readthedocs.io
-    """
-
-    # optimización del queryset para los datos
-    # de estudiante relacionados y ordenados
-    qs = queryset.prefetch_related(
-        "responsable_de", "responsable_de__seccion", "responsable_de__grado_matriculado",
-        ).order_by(
-            "responsable_de__grado_matriculado",
-            "responsable_de__seccion", 
-            "responsable_de__apellidos"
-        )
-    responsables_usados = []
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Responsables - Estudiantes"
-    ws.append(
-        [
-            "Responsable",
-            "DUI de responsable",
-            "Estudiante",
-            "Sección"
-        ]
-    )
-    ws.column_dimensions["A"].width = 35
-    ws.column_dimensions["B"].width = 12
-    ws.column_dimensions["C"].width = 35
-    ws.column_dimensions["D"].width = 45
-    for obj in qs:
-        if obj.id in responsables_usados:
-            pass
-        else:
-            for estudiante in obj.responsable_de.all().order_by("grado_matriculado__edad_normal_de_ingreso"):
-                if not estudiante.retirado:
-                    ws.append(
-                        [
-                            obj.__str__(),
-                            obj.dui,
-                            estudiante.__str__(),
-                            estudiante.seccion.__str__()
-                        ]
-                    )
-            responsables_usados.append(obj.id)
-
-    with NamedTemporaryFile() as tmp:
-        wb.save(tmp.name)
-        tmp.seek(0)
-        stream = tmp.read()
-
-        response = HttpResponse(
-            content=stream,
-            content_type="application/ms-excel",
-        )
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename=ListaDeResponsablesEstudiantes-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
-        return response
 
 def exportar_a_excel_datos_completos_de_responsables(self, request, queryset):
     """
     Acción que toma un queryset de Responsable y exporta
     a excel las columnas: Nombre, Apellidos, DUI, Sexo, Fecha de nacimiento,
-    teléfono 1 y 2, correo electrónico, Situación laboral, Dirección 
+    teléfono 1 y 2, correo electrónico, Situación laboral, Dirección
     y observaciones, haciendo uso de
     la librería openpyxl ver: openpyxl.readthedocs.io
     """
@@ -278,7 +218,7 @@ def exportar_a_excel_datos_completos_de_responsables(self, request, queryset):
             "Correo Electrónico",
             "Situación Laboral",
             "Dirección",
-            "Observaciones"
+            "Observaciones",
         ]
     )
     ws.column_dimensions["A"].width = 20
@@ -305,7 +245,7 @@ def exportar_a_excel_datos_completos_de_responsables(self, request, queryset):
                 obj.correo_electronico,
                 obj.get_situacion_laboral_display(),
                 obj.direccion_de_residencia,
-                obj.observaciones
+                obj.observaciones,
             ]
         )
 
@@ -321,4 +261,150 @@ def exportar_a_excel_datos_completos_de_responsables(self, request, queryset):
         response[
             "Content-Disposition"
         ] = f'attachment; filename=ListaDeResponsables-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
+        return response
+
+
+def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion(
+    self, request, queryset
+):
+    """
+    Acción que toma un queryset de Estudiantes y exporta
+    a excel las columnas: Responsable, DUI de responsable,
+    estudiante y sección del estudiante, ordenados en primer
+    lugar por sección, pero con familias en conjunto, es decir
+    el primer niño de kinder 3 es el primero, si tiene hermanos
+    luego ellos, luego el segundo niño de kinder 3 y sus hermanos y así
+    sucesivamente, estos hermanos ya no aparecen en su repectiva seccion
+    haciemos uso de la librería openpyxl ver: openpyxl.readthedocs.io
+    """
+
+    # optimización del queryset para los datos
+    # de responsable relacionados y ordenados
+    # para ello pasamos el query a values
+    estudiantes = (
+        queryset.select_related("responsable")
+        .order_by("grado_matriculado", "seccion", "apellidos", "nombre")
+        .values(
+            "responsable__id",
+            "responsable__apellidos",
+            "responsable__nombre",
+            "responsable__dui",
+            "apellidos",
+            "nombre",
+            "grado_matriculado__nivel",
+            "seccion__seccion",
+        )
+    )
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Responsables - Estudiantes"
+    ws.append(["Responsable", "DUI de responsable", "Estudiante", "Sección"])
+    ws.column_dimensions["A"].width = 35
+    ws.column_dimensions["B"].width = 12
+    ws.column_dimensions["C"].width = 35
+    ws.column_dimensions["D"].width = 45
+
+    # el algoritmo para encontrar otros estudiantes del mismo
+    # responsable se hace a nivel de Python y no ORM
+    responsables_usados = []
+    count = 0
+    for estudiante in estudiantes:
+        if estudiante["responsable__id"] in responsables_usados:
+            count += 1
+        else:
+            ws.append(
+                [
+                    f"{estudiante['responsable__apellidos']}, {estudiante['responsable__nombre']}",
+                    estudiante["responsable__dui"],
+                    f"{estudiante['apellidos']}, {estudiante['nombre']}",
+                    f"{estudiante['grado_matriculado__nivel']} - {estudiante['seccion__seccion']}",
+                ]
+            )
+            for estudiante_b in estudiantes[count + 1 :]:
+                if estudiante["responsable__id"] == estudiante_b["responsable__id"]:
+                    ws.append(
+                        [
+                            f"{estudiante_b['responsable__apellidos']}, {estudiante_b['responsable__nombre']}",
+                            estudiante_b["responsable__dui"],
+                            f"{estudiante_b['apellidos']}, {estudiante_b['nombre']}",
+                            f"{estudiante_b['grado_matriculado__nivel']} - {estudiante_b['seccion__seccion']}",
+                        ]
+                    )
+            responsables_usados.append(estudiante["responsable__id"])
+            count += 1
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+
+        response = HttpResponse(
+            content=stream,
+            content_type="application/ms-excel",
+        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename=ListaDeEstudiantesYResponsables-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
+        return response
+
+
+def exportar_a_excel_estudiantes_y_responsables_por_seccion(
+    self, request, queryset
+):
+    """
+    Acción que toma un queryset de Estudiantes y exporta
+    a excel las columnas: Responsable, DUI de responsable,
+    estudiante y sección del estudiante ordenados por seccion,
+    haciendo uso de la librería openpyxl ver: openpyxl.readthedocs.io
+    """
+
+    # optimización del queryset para los datos
+    # de responsable relacionados y ordenados
+    # para ello pasamos el query a values
+    estudiantes = (
+        queryset.select_related("responsable")
+        .order_by("grado_matriculado", "seccion", "apellidos", "nombre")
+        .values(
+            "responsable__id",
+            "responsable__apellidos",
+            "responsable__nombre",
+            "responsable__dui",
+            "apellidos",
+            "nombre",
+            "grado_matriculado__nivel",
+            "seccion__seccion",
+        )
+    )
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Responsables - Estudiantes"
+    ws.append(["Responsable", "DUI de responsable", "Estudiante", "Sección"])
+    ws.column_dimensions["A"].width = 35
+    ws.column_dimensions["B"].width = 12
+    ws.column_dimensions["C"].width = 35
+    ws.column_dimensions["D"].width = 45
+
+    # utilizamos los values
+    for estudiante in estudiantes:
+        ws.append(
+            [
+                f"{estudiante['responsable__apellidos']}, {estudiante['responsable__nombre']}",
+                estudiante["responsable__dui"],
+                f"{estudiante['apellidos']}, {estudiante['nombre']}",
+                f"{estudiante['grado_matriculado__nivel']} - {estudiante['seccion__seccion']}",
+            ]
+        )
+    
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+
+        response = HttpResponse(
+            content=stream,
+            content_type="application/ms-excel",
+        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename=ListaDeEstudiantesYResponsables-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
         return response

@@ -1,15 +1,15 @@
 from django.contrib import admin
 from django_admin_listfilter_dropdown.filters import (
     ChoiceDropdownFilter,
-    RelatedDropdownFilter,
 )
 
 from .actions import (
     exportar_datos_de_contacto_a_excel,
     exportar_datos_basicos_a_excel,
     exportar_todos_los_datos_a_excel,
-    exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel,
-    exportar_a_excel_datos_completos_de_responsables
+    exportar_a_excel_datos_completos_de_responsables,
+    exportar_a_excel_estudiantes_y_responsables_por_seccion,
+    exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
 )
 from .filters import SeccionFilter, NivelEducativoFilter
 from .models import (
@@ -65,10 +65,7 @@ class ResponsableAdmin(admin.ModelAdmin):
     inlines = [
         EstudianteInline,
     ]
-    actions = [
-        exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel,
-        exportar_a_excel_datos_completos_de_responsables
-        ]
+    actions = [exportar_a_excel_datos_completos_de_responsables]
 
     def get_queryset(self, request):
         return super().get_queryset(request)
@@ -244,6 +241,8 @@ class EstudianteAdmin(admin.ModelAdmin):
         exportar_datos_basicos_a_excel,
         exportar_datos_de_contacto_a_excel,
         exportar_todos_los_datos_a_excel,
+        exportar_a_excel_estudiantes_y_responsables_por_seccion,
+        exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
     ]
 
     def get_actions(self, request):
@@ -264,9 +263,13 @@ class EstudianteAdmin(admin.ModelAdmin):
             .filter(retirado=False)
         )
 
-exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel."
-exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel.short_description = (
-    "Exportar a Excel responsables y estudiantes ordenados por familia y sección "
+
+exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel"
+exportar_a_excel_estudiantes_y_responsables_por_seccion.short_description = (
+    "Exportar a Excel estudiantes y responsables ordenados por sección."
+)
+exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion.short_description = (
+    "Exportar a Excel Estudiantes y Responsables ordenados por sección y familia"
 )
 
 
