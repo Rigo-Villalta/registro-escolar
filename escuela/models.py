@@ -67,6 +67,7 @@ class NivelEducativo(models.Model):
 
     class Meta:
         verbose_name_plural = "Niveles educativos."
+        ordering = ["edad_normal_de_ingreso", "nivel"]
 
 
 class Seccion(models.Model):

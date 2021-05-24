@@ -203,9 +203,9 @@ def exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel(self, requ
     # optimización del queryset para los datos
     # de estudiante relacionados y ordenados
     qs = queryset.prefetch_related(
-        "responsable_de", "responsable_de__seccion__nivel_educativo"
+        "responsable_de", "responsable_de__seccion", "responsable_de__grado_matriculado",
         ).order_by(
-            "responsable_de__seccion__nivel_educativo__edad_normal_de_ingreso",
+            "responsable_de__grado_matriculado",
             "responsable_de__seccion", 
             "responsable_de__apellidos"
         )
@@ -226,17 +226,20 @@ def exportar_responsables_y_estudiantes_por_familia_y_seccion_a_excel(self, requ
     ws.column_dimensions["C"].width = 35
     ws.column_dimensions["D"].width = 45
     for obj in qs:
-        for estudiante in obj.responsable_de.all().order_by("grado_matriculado__edad_normal_de_ingreso"):
-            if not estudiante.retirado and obj.id not in responsables_usados:
-                ws.append(
-                    [
-                        obj.__str__(),
-                        obj.dui,
-                        estudiante.__str__(),
-                        estudiante.seccion.__str__()
-                    ]
-                )
-        responsables_usados.append(obj.id)
+        if obj.id in responsables_usados:
+            pass
+        else:
+            for estudiante in obj.responsable_de.all().order_by("grado_matriculado__edad_normal_de_ingreso"):
+                if not estudiante.retirado:
+                    ws.append(
+                        [
+                            obj.__str__(),
+                            obj.dui,
+                            estudiante.__str__(),
+                            estudiante.seccion.__str__()
+                        ]
+                    )
+            responsables_usados.append(obj.id)
 
     with NamedTemporaryFile() as tmp:
         wb.save(tmp.name)
