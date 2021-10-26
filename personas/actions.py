@@ -498,6 +498,8 @@ def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, querys
                 ws.merge_cells("A4:F4")
                 ws["A5"] = "Se recibe"
                 ws.merge_cells("A5:F5")
+                ws["A6"] = ""
+                ws.merge_cells("A6:F6")
                 ws.append(
                     [
                         "Nº",
@@ -508,8 +510,6 @@ def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, querys
                         "Firma",
                     ]
                 )
-                ws["A6"] = ""
-                ws.merge_cells("A6:F6")
                 counter_interno = 1
                 a7 = ws["A7"]
                 b7 = ws["B7"]
