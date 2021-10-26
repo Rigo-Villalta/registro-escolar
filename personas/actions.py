@@ -489,6 +489,7 @@ def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, querys
                 ws.merge_cells("A3:F3")
                 ws["A4"] = "Fecha de entrega"
                 ws.merge_cells("A4:F4")
+                ws["A5"] = "Se recibe"
                 ws.merge_cells("A5:F5")
                 ws.append(
                     [
