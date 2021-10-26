@@ -1,10 +1,16 @@
 import datetime
-from personas.models import Estudiante
 from tempfile import NamedTemporaryFile
 
-from django.db.models import Prefetch
 from django.http import HttpResponse
 from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+
+
+def set_border(ws, cell_range):
+    thin = Side(border_style="thin", color="000000")
+    for row in ws[cell_range]:
+        for cell in row:
+            cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
 
 def exportar_todos_los_datos_a_excel(self, request, queryset):
@@ -348,9 +354,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion(
         return response
 
 
-def exportar_a_excel_estudiantes_y_responsables_por_seccion(
-    self, request, queryset
-):
+def exportar_a_excel_estudiantes_y_responsables_por_seccion(self, request, queryset):
     """
     Acción que toma un queryset de Estudiantes y exporta
     a excel las columnas: Responsable, DUI de responsable,
@@ -394,7 +398,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_seccion(
                 f"{estudiante['grado_matriculado__nivel']} - {estudiante['seccion__seccion']}",
             ]
         )
-    
+
     with NamedTemporaryFile() as tmp:
         wb.save(tmp.name)
         tmp.seek(0)
@@ -407,4 +411,148 @@ def exportar_a_excel_estudiantes_y_responsables_por_seccion(
         response[
             "Content-Disposition"
         ] = f'attachment; filename=ListaDeEstudiantesYResponsables-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
+        return response
+
+
+def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, queryset):
+    """
+    Acción que toma un queryset de Estudiantes y exporta
+    a excel las columnas: Responsable, DUI de responsable,
+    estudiante y sección del estudiante, ordenados en primer
+    lugar por sección, pero con familias en conjunto, es decir
+    el primer niño de kinder 3 es el primero, si tiene hermanos
+    luego ellos, luego el segundo niño de kinder 3 y sus hermanos y así
+    sucesivamente, estos hermanos ya no aparecen en su repectiva seccion
+    haciemos uso de la librería openpyxl ver: openpyxl.readthedocs.io
+    """
+
+    # optimización del queryset para los datos
+    # de responsable relacionados y ordenados
+    # para ello pasamos el query a values
+    estudiantes = (
+        queryset.select_related("responsable")
+        .order_by("grado_matriculado", "seccion", "apellidos", "nombre")
+        .values(
+            "responsable__id",
+            "responsable__apellidos",
+            "responsable__nombre",
+            "responsable__dui",
+            "apellidos",
+            "nombre",
+            "grado_matriculado__nivel",
+            "seccion__id",
+            "seccion__seccion",
+        )
+    )
+
+    wb = Workbook()
+
+    responsables_usados = []
+    count = 0
+    seccion_actual = "0"
+    counter_interno = 1
+    ws = None
+    for estudiante in estudiantes:
+        if estudiante["responsable__id"] in responsables_usados:
+            count += 1
+        else:
+            if estudiante["seccion__id"] != seccion_actual:
+                if ws is not None:
+                    set_border(ws, "A6:F" + str(counter_interno + 5))
+                    for row in range(7, counter_interno + 6):
+                        rd = ws.row_dimensions[row]
+                        rd.height = 25
+                        a = ws["A" + str(row)]
+                        a.alignment = Alignment(horizontal="center")
+                ws = wb.create_sheet(
+                    f"{estudiante['grado_matriculado__nivel']}{estudiante['seccion__seccion']}"
+                )
+                ws.title = f"{estudiante['grado_matriculado__nivel']} - {estudiante['seccion__seccion']}".title()
+                ws.column_dimensions["A"].width = 3
+                ws.column_dimensions["B"].width = 40
+                ws.column_dimensions["C"].width = 14
+                ws.column_dimensions["D"].width = 40
+                ws.column_dimensions["E"].width = 30
+                ws.column_dimensions["F"].width = 30
+                ws["A1"] = 'Complejo Educativo "Dr. Humberto Romero Alvergue"'
+                bold = Font(bold=True)
+                a1 = ws["A1"]
+                a1.font = bold
+                a1.alignment = Alignment(horizontal="center")
+                ws.merge_cells("A1:F1")
+                ws["A2"] = "Código de Infraestructura 11674"
+                a2 = ws["A2"]
+                a2.font = bold
+                a2.alignment = Alignment(horizontal="center")
+                ws.merge_cells("A2:F2")
+                ws["A3"] = "Descripción de actividad"
+                ws.merge_cells("A3:F3")
+                ws["A4"] = "Fecha de entrega"
+                ws.merge_cells("A4:F4")
+                ws.merge_cells("A5:F5")
+                ws.append(
+                    [
+                        "Nº",
+                        "Nombre de Padre /Madre o Responsable",
+                        "Nº de DUI",
+                        "Estudiante",
+                        "Sección de estudiante",
+                        "Firma",
+                    ]
+                )
+                counter_interno = 1
+                a6 = ws["A6"]
+                b6 = ws["B6"]
+                c6 = ws["C6"]
+                d6 = ws["D6"]
+                e6 = ws["E6"]
+                f6 = ws["F6"]
+                fill_gray = PatternFill(
+                    fill_type="solid", start_color="DDDDDD", end_color="DDDDDD"
+                )
+                a6.fill = fill_gray
+                b6.fill = fill_gray
+                c6.fill = fill_gray
+                d6.fill = fill_gray
+                e6.fill = fill_gray
+                f6.fill = fill_gray
+            ws.append(
+                [
+                    str(counter_interno),
+                    f"{estudiante['responsable__apellidos']}, {estudiante['responsable__nombre']}",
+                    estudiante["responsable__dui"],
+                    f"{estudiante['apellidos']}, {estudiante['nombre']}",
+                    f"{estudiante['grado_matriculado__nivel'].title()} - {estudiante['seccion__seccion']}",
+                ]
+            )
+            counter_interno += 1
+            for estudiante_b in estudiantes[count + 1 :]:
+                if estudiante["responsable__id"] == estudiante_b["responsable__id"]:
+                    ws.append(
+                        [
+                            str(counter_interno),
+                            f"{estudiante_b['responsable__apellidos']}, {estudiante_b['responsable__nombre']}",
+                            estudiante_b["responsable__dui"],
+                            f"{estudiante_b['apellidos']}, {estudiante_b['nombre']}",
+                            f"{estudiante_b['grado_matriculado__nivel'].title()} - {estudiante_b['seccion__seccion']}",
+                        ]
+                    )
+                    counter_interno += 1
+            seccion_actual = estudiante["seccion__id"]
+            responsables_usados.append(estudiante["responsable__id"])
+            count += 1
+    del wb["Sheet"]
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+
+        response = HttpResponse(
+            content=stream,
+            content_type="application/ms-excel",
+        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename=ListaDeEstudiantesYResponsablesParaFirmas-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
         return response
