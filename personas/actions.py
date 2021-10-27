@@ -4,14 +4,6 @@ from tempfile import NamedTemporaryFile
 
 from django.http import HttpResponse
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
-
-
-def set_border(ws, cell_range):
-    thin = Side(border_style="thin", color="000000")
-    for row in ws[cell_range]:
-        for cell in row:
-            cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
 
 def exportar_todos_los_datos_a_excel(self, request, queryset):
