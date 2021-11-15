@@ -148,6 +148,7 @@ class Estudiante(Persona):
         NivelEducativo,
         help_text="Nivel educativo en que el estudiante queda matriculado",
         on_delete=models.CASCADE,
+        null=True
     )
     seccion = ChainedForeignKey(
         Seccion,
