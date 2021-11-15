@@ -8,6 +8,7 @@ from .models import Escuela, NivelEducativo, Seccion, PeriodoEscolar
 
 class EstudianteInline(admin.TabularInline):
     model = Estudiante
+    fk_name="seccion"
     fields = ["nombre", "apellidos", "sexo", "fecha_de_nacimiento"]
     extra = 0
     verbose_name_plural = "Estudiantes en la sección"

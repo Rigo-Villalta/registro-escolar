@@ -153,9 +153,8 @@ class EstudianteAdmin(admin.ModelAdmin):
                 "fields": [
                     "nie",
                     "escuela_previa",
-                    "seccion_previa",
-                    "grado_matriculado",
                     "seccion",
+                    "seccion2022"
                 ]
             },
         ),
@@ -259,9 +258,29 @@ class EstudianteAdmin(admin.ModelAdmin):
         return (
             super()
             .get_queryset(request)
-            .prefetch_related("grado_matriculado")
+            .prefetch_related("grado_matriculado", "seccion")
             .filter(retirado=False)
         )
+    
+    def get_readonly_fields(self, request, obj=None):
+        if obj is not None:
+            readonly_fields = list(super().get_readonly_fields(request, obj=obj))
+            readonly_fields.append("seccion")
+            return  readonly_fields
+        return super().get_readonly_fields(request, obj=obj)
+    
+    def get_fieldsets(self, request, obj=None):
+        if obj is not None:
+            return super().get_fieldsets(request, obj=obj)
+        else:
+            fieldsets = super().get_fieldsets(request, obj=obj)
+            fieldsets[2][1]["fields"] =  [
+                "nie",
+                "escuela_previa",
+                "seccion2022"
+                ]
+            return fieldsets
+
 
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel"

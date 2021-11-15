@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.db.models.deletion import PROTECT
 from django.urls import reverse
 from smart_selects.db_fields import ChainedForeignKey
 
@@ -143,19 +144,6 @@ class Estudiante(Persona):
         verbose_name="NIE", max_length=12, blank=True, null=True, unique=True
     )
     escuela_previa = models.ForeignKey(Escuela, on_delete=models.CASCADE)
-    seccion_previa = models.CharField(
-        max_length=1,
-        choices=(
-            ("A", "A"),
-            ("B", "B"),
-            ("C", "C"),
-            ("D", "D"),
-            ("E", "E"),
-            ("N", "Nuevo ingreso"),
-        ),
-        blank=True,
-        help_text="Si el estudiante proviene de otra institución o no estudió el año escolar anterior seleccione nuevo ingreso.",
-    )
     grado_matriculado = models.ForeignKey(
         NivelEducativo,
         help_text="Nivel educativo en que el estudiante queda matriculado",
@@ -163,12 +151,21 @@ class Estudiante(Persona):
     )
     seccion = ChainedForeignKey(
         Seccion,
-        verbose_name="Sección",
+        verbose_name="Sección 2021",
         chained_field="grado_matriculado",
         chained_model_field="nivel_educativo",
         show_all=False,
         auto_choose=True,
         sort=True,
+        blank=True,
+        null=True
+    )
+    seccion2022 = models.ForeignKey(
+        to=Seccion,
+        verbose_name= "Sección 2022",
+        related_name="seccion_2022",
+        on_delete=models.PROTECT,
+        null=True
     )
     posee_partida = models.BooleanField(
         verbose_name="Posee partida de nacimiento",
