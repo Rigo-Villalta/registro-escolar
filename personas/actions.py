@@ -1,8 +1,7 @@
-import datetime
-from personas.models import Estudiante
+import datetime, io
+import xlsxwriter
 from tempfile import NamedTemporaryFile
 
-from django.db.models import Prefetch
 from django.http import HttpResponse
 from openpyxl import Workbook
 
@@ -348,9 +347,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion(
         return response
 
 
-def exportar_a_excel_estudiantes_y_responsables_por_seccion(
-    self, request, queryset
-):
+def exportar_a_excel_estudiantes_y_responsables_por_seccion(self, request, queryset):
     """
     Acción que toma un queryset de Estudiantes y exporta
     a excel las columnas: Responsable, DUI de responsable,
@@ -394,7 +391,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_seccion(
                 f"{estudiante['grado_matriculado__nivel']} - {estudiante['seccion__seccion']}",
             ]
         )
-    
+
     with NamedTemporaryFile() as tmp:
         wb.save(tmp.name)
         tmp.seek(0)
@@ -408,3 +405,136 @@ def exportar_a_excel_estudiantes_y_responsables_por_seccion(
             "Content-Disposition"
         ] = f'attachment; filename=ListaDeEstudiantesYResponsables-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
         return response
+
+
+def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, queryset):
+    """
+    Acción que toma un queryset de Estudiantes y exporta
+    a excel las columnas: Responsable, DUI de responsable,
+    estudiante y sección del estudiante, ordenados en primer
+    lugar por sección, pero con familias en conjunto, es decir
+    si le primer nivel es kinder 3, el primer nino de ese grado aparece
+    seguido de sus heramnos, luego el segundo niño de kinder 3 y sus hermanos y así
+    sucesivamente, estos hermanos ya no aparecen en su repectiva seccion
+    haciemos uso de la librería XlsxWriter ver: xlsxwriter.readthedocs.io
+    """
+
+    estudiantes = (
+        queryset.prefetch_related("grado_matriculado__nivel")
+        .order_by("grado_matriculado", "seccion", "apellidos", "nombre")
+        .values(
+            "responsable__id",
+            "responsable__apellidos",
+            "responsable__nombre",
+            "responsable__dui",
+            "apellidos",
+            "nombre",
+            "grado_matriculado__nivel",
+            "seccion__id",
+            "seccion__seccion",
+        )
+    )
+
+    output = io.BytesIO()
+    wb = xlsxwriter.Workbook(output)
+    header_format = wb.add_format({"bold": 1, "align": "center", "valign": "vcenter"})
+    list_header_format = wb.add_format(
+        {"bold": 1, "border": 1, "bg_color": "#BBBBBB", "valign": "vcenter"}
+    )
+    list_body_format = wb.add_format(
+        {
+            "border": 1,
+        }
+    )
+
+    responsables_usados = []
+    count = 0
+    seccion_actual = "0"
+    counter_interno = 1
+    ws = None
+    for estudiante in estudiantes:
+        if estudiante["responsable__id"] in responsables_usados:
+            count += 1
+        else:
+            if estudiante["seccion__id"] != seccion_actual:
+                ws = wb.add_worksheet(
+                    f"{estudiante['grado_matriculado__nivel']} {estudiante['seccion__seccion']}".title()
+                    .replace("Años", "")
+                    .replace("Año", "")
+                    .replace("Bachillerato", "")
+                )
+                ws.set_column(0, 0, 3)
+                ws.set_column(1, 1, 36)
+                ws.set_column(2, 2, 11)
+                ws.set_column(3, 3, 36)
+                ws.set_column(4, 4, 40)
+                ws.set_column(5, 5, 20)
+                ws.merge_range(
+                    "A1:F1",
+                    'Complejo Educativo "Dr. Humberto Romero Alvergue"',
+                    header_format,
+                )
+                ws.merge_range(
+                    "A2:F2", "Código de Infraestructura 11674", header_format
+                )
+                ws.merge_range("A3:F3", "Descripción de actividad")
+                ws.merge_range("A4:F4", "Fecha de entrega")
+                ws.merge_range("A5:F5", "Se recibe")
+                ws.merge_range("A6:F6", "")
+                ws.write_row(
+                    "A7",
+                    [
+                        "Nº",
+                        "Nombre de Responsable",
+                        "Nº de DUI",
+                        "Estudiante",
+                        "Sección de estudiante",
+                        "Firma",
+                    ],
+                    list_header_format,
+                )
+                counter_interno = 1
+            ws.write_row(
+                counter_interno + 6,
+                0,
+                [
+                    str(counter_interno),
+                    f"{estudiante['responsable__apellidos']}, {estudiante['responsable__nombre']}",
+                    estudiante["responsable__dui"],
+                    f"{estudiante['apellidos']}, {estudiante['nombre']}",
+                    f"{estudiante['grado_matriculado__nivel'].title()} {estudiante['seccion__seccion']}",
+                    "",
+                ],
+                list_body_format,
+            )
+            ws.set_row(counter_interno + 6, 25)
+            counter_interno += 1
+            for estudiante_b in estudiantes[count + 1 :]:
+                if estudiante["responsable__id"] == estudiante_b["responsable__id"]:
+                    ws.write_row(
+                        counter_interno + 6,
+                        0,
+                        [
+                            str(counter_interno),
+                            f"{estudiante_b['responsable__apellidos']}, {estudiante_b['responsable__nombre']}",
+                            estudiante_b["responsable__dui"],
+                            f"{estudiante_b['apellidos']}, {estudiante_b['nombre']}",
+                            f"{estudiante_b['grado_matriculado__nivel'].title()} {estudiante_b['seccion__seccion']}",
+                            "",
+                        ],
+                        list_body_format,
+                    )
+                    ws.set_row(counter_interno + 6, 25)
+                    counter_interno += 1
+            seccion_actual = estudiante["seccion__id"]
+            responsables_usados.append(estudiante["responsable__id"])
+            count += 1
+    wb.close()
+    output.seek(0)
+    filename = f"ListaDeEstudiantesYResponsablesParaFirmas-{datetime.datetime.now().strftime('%Y_%m_%d-%H%M')}.xlsx"
+    response = HttpResponse(
+        output,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = "attachment; filename=%s" % filename
+    return response
