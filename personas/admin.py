@@ -118,7 +118,6 @@ class EstudianteAdmin(admin.ModelAdmin):
         "responsable",
         "menores_cohabitantes",
     ]
-    inlines = [EstudiantesMenoresAdminInline, FamiliaAdminInline]
     fieldsets = (
         (
             "Datos básicos del estudiante",
@@ -149,14 +148,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         ),
         (
             "Información escolar",
-            {
-                "fields": [
-                    "nie",
-                    "escuela_previa",
-                    "seccion",
-                    "seccion2022"
-                ]
-            },
+            {"fields": ["nie", "escuela_previa", "seccion", "seccion2022"]},
         ),
         (
             "Información complementaria",
@@ -244,6 +236,9 @@ class EstudianteAdmin(admin.ModelAdmin):
         exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
     ]
 
+    class Media:
+        js = ("hidePlus.js",)
+
     def get_actions(self, request):
         actions = super().get_actions(request)
         if "delete_selected" in actions:
@@ -261,26 +256,21 @@ class EstudianteAdmin(admin.ModelAdmin):
             .prefetch_related("grado_matriculado", "seccion__nivel_educativo")
             .filter(retirado=False)
         )
-    
+
     def get_readonly_fields(self, request, obj=None):
         if obj is not None:
             readonly_fields = list(super().get_readonly_fields(request, obj=obj))
             readonly_fields.append("seccion")
-            return  readonly_fields
+            return readonly_fields
         return super().get_readonly_fields(request, obj=obj)
-    
+
     def get_fieldsets(self, request, obj=None):
         if obj is not None:
             return super().get_fieldsets(request, obj=obj)
         else:
             fieldsets = super().get_fieldsets(request, obj=obj)
-            fieldsets[2][1]["fields"] =  [
-                "nie",
-                "escuela_previa",
-                "seccion2022"
-                ]
+            fieldsets[2][1]["fields"] = ["nie", "escuela_previa", "seccion2022"]
             return fieldsets
-
 
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel"
