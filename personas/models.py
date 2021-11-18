@@ -168,6 +168,7 @@ class Estudiante(Persona):
         related_name="seccion_2022",
         on_delete=models.PROTECT,
         null=True,
+        blank=True
     )
     posee_partida = models.BooleanField(
         verbose_name="Posee partida de nacimiento",
@@ -398,24 +399,27 @@ class Estudiante(Persona):
         return reverse("admin:personas_estudiante_change", args=(self.pk,))
 
     def clean(self):
-        if (
-            self.seccion2022.nivel_educativo.edad_normal_de_ingreso
-            < self.seccion.nivel_educativo.edad_normal_de_ingreso
-        ):
-            raise ValidationError(
-                {
-                    "seccion2022": "El Estudiante no puede ser matriculado en un grado inferior al del año anterior"
-                }
-            )
-        elif (
-            self.seccion2022.nivel_educativo.edad_normal_de_ingreso
-            > self.seccion.nivel_educativo.edad_normal_de_ingreso + 1
-        ):
-            raise ValidationError(
-                {
-                    "seccion2022": "El Estudiante no puede ser promovido dos o más niveles educativos."
-                }
-            )
+        try:
+            if (
+                self.seccion2022.nivel_educativo.edad_normal_de_ingreso
+                < self.seccion.nivel_educativo.edad_normal_de_ingreso
+            ):
+                raise ValidationError(
+                    {
+                        "seccion2022": "El Estudiante no puede ser matriculado en un grado inferior al del año anterior"
+                    }
+                )
+            elif (
+                self.seccion2022.nivel_educativo.edad_normal_de_ingreso
+                > self.seccion.nivel_educativo.edad_normal_de_ingreso + 1
+            ):
+                raise ValidationError(
+                    {
+                        "seccion2022": "El Estudiante no puede ser promovido dos o más niveles educativos."
+                    }
+                )
+        except:
+            pass
 
 
 class Familia(models.Model):
