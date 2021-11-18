@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 from django_admin_listfilter_dropdown.filters import (
     ChoiceDropdownFilter,
 )
@@ -283,6 +284,7 @@ exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion.short_descript
 
 class MunicipioAdmin(admin.ModelAdmin):
     search_fields = ["nombre"]
+    list_display = ("__str__", "estudiantes_residentes")
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -291,8 +293,10 @@ class MunicipioAdmin(admin.ModelAdmin):
         return actions
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related("departamento")
+        return super().get_queryset(request).prefetch_related("departamento").annotate(_estudiantes_residentes=Count("reside_en"))
 
+    def estudiantes_residentes(self, obj):
+       return obj._estudiantes_residentes
 
 admin.site.register(Departamento)
 admin.site.register(Estudiante, EstudianteAdmin)
