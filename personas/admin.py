@@ -117,6 +117,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         "estudiantes_en_la_misma_casa",
         "responsable",
         "menores_cohabitantes",
+        "seccion2022"
     ]
     fieldsets = (
         (

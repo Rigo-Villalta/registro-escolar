@@ -84,6 +84,7 @@ class SeccionAdmin(admin.ModelAdmin):
         "nivel_educativo",
         "seccion",
     ]
+    search_fields = ["__str__"]
 
     inlines = [
         EstudianteInline,
