@@ -259,10 +259,8 @@ class EstudianteAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj is not None:
-            readonly_fields = list(super().get_readonly_fields(request, obj=obj))
-            readonly_fields.append("seccion")
+            readonly_fields = ["seccion"]
             return readonly_fields
-        return super().get_readonly_fields(request, obj=obj)
 
     def get_fieldsets(self, request, obj=None):
         if obj is not None:
