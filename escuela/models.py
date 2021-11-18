@@ -46,13 +46,13 @@ class NivelEducativo(models.Model):
         for seccion in self.seccion_set.all():
             total += seccion.estudiante_set.count()
         return total
-    
+
     def total_femenino(self):
         total = 0
         for seccion in self.seccion_set.all():
             total += seccion.estudiante_set.filter(sexo="F").count()
         return total
-    
+
     def total_masculino(self):
         total = 0
         for seccion in self.seccion_set.all():
@@ -82,15 +82,15 @@ class Seccion(models.Model):
 
     def total_estudiantes(self):
         return self.estudiante_set.count()
-    
+
     def total_femenino(self):
         return self.estudiante_set.filter(sexo="F").count()
-    
+
     def total_masculino(self):
         return self.estudiante_set.filter(sexo="M").count()
 
     def __str__(self):
-        return f'{self.nivel_educativo} sección "{self.seccion}"'
+        return f"{self.nivel_educativo} {self.seccion}"
 
     class Meta:
         verbose_name = "Sección"
