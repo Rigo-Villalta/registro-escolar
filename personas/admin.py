@@ -283,7 +283,6 @@ exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion.short_descript
 
 class MunicipioAdmin(admin.ModelAdmin):
     search_fields = ["nombre"]
-    ordering = ["id"]
 
     def get_actions(self, request):
         actions = super().get_actions(request)
