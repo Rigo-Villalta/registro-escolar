@@ -94,7 +94,7 @@ class EstudiantesMenoresAdminInline(admin.TabularInline):
 
 
 class EstudianteAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "grado_matriculado", "seccion", "edad", "sexo"]
+    list_display = ["__str__", "seccion", "seccion2022", "edad", "sexo"]
     ordering = [
         "grado_matriculado__edad_normal_de_ingreso",
         "seccion",
