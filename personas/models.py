@@ -1,4 +1,5 @@
 import datetime
+from django.core.exceptions import ValidationError
 
 from django.db import models
 from django.db.models.deletion import PROTECT
@@ -148,7 +149,7 @@ class Estudiante(Persona):
         NivelEducativo,
         help_text="Nivel educativo en que el estudiante queda matriculado",
         on_delete=models.CASCADE,
-        null=True
+        null=True,
     )
     seccion = ChainedForeignKey(
         Seccion,
@@ -159,14 +160,14 @@ class Estudiante(Persona):
         auto_choose=True,
         sort=True,
         blank=True,
-        null=True
+        null=True,
     )
     seccion2022 = models.ForeignKey(
         to=Seccion,
-        verbose_name= "Sección 2022",
+        verbose_name="Sección 2022",
         related_name="seccion_2022",
         on_delete=models.PROTECT,
-        null=True
+        null=True,
     )
     posee_partida = models.BooleanField(
         verbose_name="Posee partida de nacimiento",
@@ -392,9 +393,29 @@ class Estudiante(Persona):
 
     def __str__(self):
         return f"{self.apellidos}, {self.nombre} "
-    
+
     def get_absolute_url(self):
-        return reverse("admin:personas_estudiante_change", args=(self.pk,)) 
+        return reverse("admin:personas_estudiante_change", args=(self.pk,))
+
+    def clean(self):
+        if (
+            self.seccion2022.nivel_educativo.edad_normal_de_ingreso
+            < self.seccion.nivel_educativo.edad_normal_de_ingreso
+        ):
+            raise ValidationError(
+                {
+                    "seccion2022": "El Estudiante no puede ser matriculado en un grado inferior al del año anterior"
+                }
+            )
+        elif (
+            self.seccion2022.nivel_educativo.edad_normal_de_ingreso
+            > self.seccion.nivel_educativo.edad_normal_de_ingreso + 1
+        ):
+            raise ValidationError(
+                {
+                    "seccion2022": "El Estudiante no puede ser promovido dos o más niveles educativos."
+                }
+            )
 
 
 class Familia(models.Model):
