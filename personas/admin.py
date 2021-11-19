@@ -118,7 +118,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         "estudiantes_en_la_misma_casa",
         "responsable",
         "menores_cohabitantes",
-        "seccion2022"
+        "seccion2022",
     ]
     fieldsets = (
         (
@@ -293,12 +293,17 @@ class MunicipioAdmin(admin.ModelAdmin):
         return actions
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related("departamento").annotate(_estudiantes_residentes=Count("reside_en")).order_by("-_estudiantes_residentes")
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related("departamento")
+            .annotate(_estudiantes_residentes=Count("reside_en"))
+            .order_by("-_estudiantes_residentes")
+        )
 
     def estudiantes_residentes(self, obj):
-       return obj._estudiantes_residentes
+        return obj._estudiantes_residentes
 
-    #estudiantes_residentes.admin_order_field = "-_estudiantes_residentes"
 
 admin.site.register(Departamento)
 admin.site.register(Estudiante, EstudianteAdmin)
