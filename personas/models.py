@@ -34,9 +34,6 @@ class Municipio(models.Model):
 
     def __str__(self):
         return f"{self.nombre} - {self.departamento}"
-    
-    class Meta:
-        ordering = ["nombre"]
 
 
 class Persona(models.Model):
