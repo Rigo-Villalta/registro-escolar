@@ -263,6 +263,8 @@ class EstudianteAdmin(admin.ModelAdmin):
         if obj is not None:
             readonly_fields = ["seccion"]
             return readonly_fields
+        else:
+            return []
 
     def get_fieldsets(self, request, obj=None):
         if obj is not None:
