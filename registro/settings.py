@@ -8,6 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Application definition
 
 INSTALLED_APPS = [
+    "users.apps.UsersConfig",
     "django_admin_listfilter_dropdown",
     "smart_selects",
     "disciplina.apps.DisciplinaConfig",
@@ -107,3 +108,5 @@ INTERNAL_IPS = ['127.0.0.1',]
 STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+AUTH_USER_MODEL = 'users.User'
