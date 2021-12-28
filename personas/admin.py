@@ -16,30 +16,11 @@ from .filters import SeccionFilter, NivelEducativoFilter
 from .models import (
     Departamento,
     Estudiante,
-    Familia,
     MenorDeEdad,
     EstudiantesYMenores,
     Municipio,
     Responsable,
 )
-
-
-class FamiliaAdmin(admin.ModelAdmin):
-    list_display = ["estudiante", "familiar", "relacion"]
-
-    def get_actions(self, request):
-        actions = super().get_actions(request)
-        if "delete_selected" in actions:
-            del actions["delete_selected"]
-        return actions
-
-
-class FamiliaAdminInline(admin.TabularInline):
-    model = Familia
-    autocomplete_fields = [
-        "familiar",
-    ]
-    extra = 0
 
 
 class EstudianteInline(admin.StackedInline):
@@ -114,10 +95,8 @@ class EstudianteAdmin(admin.ModelAdmin):
         "municipio_de_residencia",
         "municipio_de_nacimiento",
         "escuela_previa",
-        "familiares",
         "estudiantes_en_la_misma_casa",
         "responsable",
-        "menores_cohabitantes",
         "seccion2022",
     ]
     fieldsets = (
@@ -309,7 +288,6 @@ class MunicipioAdmin(admin.ModelAdmin):
 
 admin.site.register(Departamento)
 admin.site.register(Estudiante, EstudianteAdmin)
-admin.site.register(Familia, FamiliaAdmin)
 admin.site.register(Municipio, MunicipioAdmin)
 admin.site.register(Responsable, ResponsableAdmin)
 admin.site.register(MenorDeEdad, MenorDeEdadAdmin)
