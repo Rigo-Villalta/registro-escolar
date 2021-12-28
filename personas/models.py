@@ -2,7 +2,6 @@ import datetime
 from django.core.exceptions import ValidationError
 
 from django.db import models
-from django.db.models.deletion import PROTECT
 from django.urls import reverse
 from smart_selects.db_fields import ChainedForeignKey
 
@@ -95,51 +94,6 @@ class Responsable(Persona):
         return f"{self.apellidos}, {self.nombre}"
 
 
-class MenorDeEdad(models.Model):
-    """
-    Menores de edad que se deben registrar en el sistema
-    pero que no estudian en la institución
-    """
-
-    nombre = models.CharField(max_length=40)
-    apellidos = models.CharField(max_length=40)
-    fecha_de_nacimiento = models.DateField(
-        validators=[validate_date_is_past], blank=True, null=True
-    )
-    estudia = models.BooleanField(
-        verbose_name="¿El menor estudia?",
-    )
-    institucion_educativa = models.ForeignKey(
-        Escuela,
-        verbose_name="Institución Educativa del menor",
-        on_delete=models.CASCADE,
-        blank=True,
-    )
-    TRANSPORTE_CHOICES = [
-        ("B", "Bicicleta"),
-        ("V", "Vehículo"),
-        ("P", "Transpote Público"),
-        ("E", "Transporte Escolar"),
-        ("M", "Motocicleta"),
-        ("C", "Camina"),
-        ("O", "Otro"),
-    ]
-    medio_de_transporte = models.CharField(
-        max_length=1,
-        choices=TRANSPORTE_CHOICES,
-        help_text="Medio de transporte principal del menor",
-        blank=True,
-        null=True,
-    )
-
-    def __str__(self):
-        return f"{self.apellidos}, {self.nombre}"
-
-    class Meta:
-        verbose_name = " Menor de edad"
-        verbose_name_plural = "Menores de edad"
-
-
 class Estudiante(Persona):
     nie = models.CharField(
         verbose_name="NIE", max_length=12, blank=True, null=True, unique=True
@@ -168,7 +122,7 @@ class Estudiante(Persona):
         related_name="seccion_2022",
         on_delete=models.PROTECT,
         null=True,
-        blank=True
+        blank=True,
     )
     posee_partida = models.BooleanField(
         verbose_name="Posee partida de nacimiento",
@@ -364,23 +318,10 @@ class Estudiante(Persona):
         choices=Relacion.choices,
         default=Relacion.MADRE,
     )
-    familiares = models.ManyToManyField(Responsable, through="Familia")
     estudiantes_en_la_misma_casa = models.ManyToManyField(
         "self",
-        help_text=(
-            "Ingrese a menores de edad que vivien con el estudiante y"
-            " que son estudiantes de la institución educativa"
-        ),
+        help_text=("Ingrese estudiantes que viven en la misma casa."),
         blank=True,
-    )
-    menores_cohabitantes = models.ManyToManyField(
-        MenorDeEdad,
-        help_text=(
-            "Ingrese a menores de edad que viven con el estudiante y "
-            "que no son estudiantes de la institución educativa"
-        ),
-        through="EstudiantesYMenores",
-        through_fields=("estudiante", "menor_de_edad"),
     )
     activo = models.BooleanField(
         help_text="Desmarcar si el estudiante retira documentos", default=True
@@ -420,38 +361,3 @@ class Estudiante(Persona):
                 )
         except:
             pass
-
-
-class Familia(models.Model):
-    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
-    familiar = models.ForeignKey(
-        Responsable,
-        on_delete=models.CASCADE,
-        help_text="Seleccione un familiar para el estudiante",
-    )
-
-    relacion = models.CharField(
-        verbose_name="Relación",
-        max_length=1,
-        choices=Relacion.choices,
-        default=Relacion.MADRE,
-    )
-
-    def __str__(self):
-        return f"{self.estudiante} - {self.familiar}"
-
-    class Meta:
-        verbose_name = "Familiar"
-        verbose_name_plural = "Familiares"
-
-
-class EstudiantesYMenores(models.Model):
-    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
-    menor_de_edad = models.ForeignKey(MenorDeEdad, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.estudiante} - {self.menor_de_edad}"
-
-    class Meta:
-        verbose_name = "Menores que habitan en la misma casa con el estudiante"
-        verbose_name_plural = "Menores que habitan en la misma casa con el estudiante"

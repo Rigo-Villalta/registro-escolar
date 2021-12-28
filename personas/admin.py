@@ -16,8 +16,6 @@ from .filters import SeccionFilter, NivelEducativoFilter
 from .models import (
     Departamento,
     Estudiante,
-    MenorDeEdad,
-    EstudiantesYMenores,
     Municipio,
     Responsable,
 )
@@ -57,22 +55,6 @@ class ResponsableAdmin(admin.ModelAdmin):
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions
-
-
-class MenorDeEdadAdmin(admin.ModelAdmin):
-    search_fields = ["nombre", "apellidos"]
-
-    def get_actions(self, request):
-        actions = super().get_actions(request)
-        if "delete_selected" in actions:
-            del actions["delete_selected"]
-        return actions
-
-
-class EstudiantesMenoresAdminInline(admin.TabularInline):
-    model = EstudiantesYMenores
-    autocomplete_fields = ["menor_de_edad"]
-    extra = 0
 
 
 class EstudianteAdmin(admin.ModelAdmin):
@@ -234,7 +216,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         return (
             super()
             .get_queryset(request)
-            .prefetch_related("grado_matriculado", "seccion__nivel_educativo")
+            .prefetch_related("grado_matriculado", "seccion__nivel_educativo", "seccion2022__nivel_educativo")
             .filter(retirado=False)
         )
 
@@ -290,4 +272,3 @@ admin.site.register(Departamento)
 admin.site.register(Estudiante, EstudianteAdmin)
 admin.site.register(Municipio, MunicipioAdmin)
 admin.site.register(Responsable, ResponsableAdmin)
-admin.site.register(MenorDeEdad, MenorDeEdadAdmin)
