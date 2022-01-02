@@ -10,7 +10,7 @@ class User(AbstractUser):
     )
     tipo_de_usuario = models.PositiveSmallIntegerField(
         choices=TIPOS_DE_USUARIO,
-        default=2
+        default=3
     )
     
     class Meta:
