@@ -325,3 +325,20 @@ class Estudiante(Persona):
 
     def get_absolute_url(self):
         return reverse("admin:personas_estudiante_change", args=(self.pk,))
+    
+    def save(self, *args, **kwargs):
+        """
+        Mantenemos una y solo una sección de cada período escolar.
+        """
+        if self.seccion:
+            if self.seccion in self.secciones.all():
+                pass
+            else:
+                try:
+                    seccion_a_eliminar = self.secciones.get(periodo_escolar=self.seccion.periodo_escolar)
+                    self.secciones.remove(seccion_a_eliminar)
+                except:
+                    pass
+                finally:
+                    self.secciones.add(self.seccion)
+        super(Estudiante, self).save(*args, **kwargs)
