@@ -23,13 +23,15 @@ class SeccionFilter(admin.SimpleListFilter):
             return [
                 (seccion.id, seccion.__str__)
                 for seccion in Seccion.objects.filter(
-                    nivel_educativo=search
+                    nivel_educativo=search, periodo_escolar__periodo_activo=True
                 ).select_related("nivel_educativo")
             ]
         else:
             return [
                 (seccion.id, seccion.__str__)
-                for seccion in Seccion.objects.select_related("nivel_educativo")
+                for seccion in Seccion.objects.filter(
+                    periodo_escolar__periodo_activo=True
+                ).select_related("nivel_educativo")
             ]
 
     def queryset(self, request, queryset):
@@ -55,4 +57,23 @@ class NivelEducativoFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value():
-            return queryset.filter(grado_matriculado__id=self.value())
+            return queryset.filter(seccion__nivel_educativo__id=self.value())
+
+
+class EstaMatriculadoFilter(admin.SimpleListFilter):
+    """
+    Filtro para ver estudiantes matriculados y los que no tienen sección
+    """
+
+    template = "django_admin_listfilter_dropdown/dropdown_filter.html"
+    title = "¿Matriculado?"
+    parameter_name = "matriculado"
+
+    def lookups(self, request, model_admin):
+        return [("1", "Si"), ("2", "No")]
+
+    def queryset(self, request, queryset):
+        if self.value() == "1":
+            return queryset.filter(seccion__isnull=False)
+        elif self.value() == "2":
+            return queryset.filter(seccion__isnull=True)

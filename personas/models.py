@@ -98,32 +98,17 @@ class Estudiante(Persona):
     nie = models.CharField(
         verbose_name="NIE", max_length=12, blank=True, null=True, unique=True
     )
-    escuela_previa = models.ForeignKey(Escuela, on_delete=models.CASCADE)
-    grado_matriculado = models.ForeignKey(
-        NivelEducativo,
-        help_text="Nivel educativo en que el estudiante queda matriculado",
-        on_delete=models.CASCADE,
-        null=True,
-    )
-    seccion = ChainedForeignKey(
+    escuela_previa = models.ForeignKey(Escuela, on_delete=models.CASCADE, blank=True, null=True)
+    seccion = models.ForeignKey(
         Seccion,
-        verbose_name="Sección 2021",
-        chained_field="grado_matriculado",
-        chained_model_field="nivel_educativo",
-        show_all=False,
-        auto_choose=True,
-        sort=True,
+        verbose_name="Sección",
         blank=True,
         null=True,
-    )
-    seccion2022 = models.ForeignKey(
-        to=Seccion,
-        verbose_name="Sección 2022",
-        related_name="seccion_2022",
         on_delete=models.PROTECT,
-        null=True,
-        blank=True,
+        related_name="estudiantes_en",
+        limit_choices_to={"periodo_escolar__periodo_activo": True}
     )
+    secciones = models.ManyToManyField(Seccion, related_name="estudiantes")
     posee_partida = models.BooleanField(
         verbose_name="Posee partida de nacimiento",
         help_text=(

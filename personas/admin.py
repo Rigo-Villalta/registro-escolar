@@ -12,7 +12,7 @@ from .actions import (
     exportar_a_excel_estudiantes_y_responsables_por_seccion,
     exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
 )
-from .filters import SeccionFilter, NivelEducativoFilter
+from .filters import SeccionFilter, NivelEducativoFilter, EstaMatriculadoFilter
 from .models import (
     Departamento,
     Estudiante,
@@ -58,9 +58,9 @@ class ResponsableAdmin(admin.ModelAdmin):
 
 
 class EstudianteAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "seccion", "seccion2022", "edad", "sexo"]
+    list_display = ["__str__", "seccion", "edad", "sexo"]
     ordering = [
-        "grado_matriculado__edad_normal_de_ingreso",
+        "seccion__nivel_educativo__edad_normal_de_ingreso",
         "seccion",
         "apellidos",
         "nombre",
@@ -70,6 +70,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         NivelEducativoFilter,
         SeccionFilter,
         "retirado",
+        EstaMatriculadoFilter
     )
     # ["grado_matriculado", "seccion"]
     search_fields = ["nombre", "apellidos"]
@@ -79,7 +80,8 @@ class EstudianteAdmin(admin.ModelAdmin):
         "escuela_previa",
         "estudiantes_en_la_misma_casa",
         "responsable",
-        "seccion2022",
+        "seccion",
+        "secciones"
     ]
     fieldsets = (
         (
@@ -111,7 +113,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         ),
         (
             "Información escolar",
-            {"fields": ["nie", "escuela_previa", "seccion", "seccion2022"]},
+            {"fields": ["nie", "escuela_previa", "seccion",  "secciones"]},
         ),
         (
             "Información complementaria",
@@ -216,24 +218,9 @@ class EstudianteAdmin(admin.ModelAdmin):
         return (
             super()
             .get_queryset(request)
-            .prefetch_related("grado_matriculado", "seccion__nivel_educativo", "seccion2022__nivel_educativo")
+            .select_related("seccion__nivel_educativo")
             .filter(retirado=False)
         )
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj is not None:
-            readonly_fields = ["seccion"]
-            return readonly_fields
-        else:
-            return []
-
-    def get_fieldsets(self, request, obj=None):
-        if obj is not None:
-            return super().get_fieldsets(request, obj=obj)
-        else:
-            fieldsets = super().get_fieldsets(request, obj=obj)
-            fieldsets[2][1]["fields"] = ["nie", "escuela_previa", "seccion2022"]
-            return fieldsets
 
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel"

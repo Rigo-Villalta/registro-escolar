@@ -117,9 +117,9 @@ def exportar_a_excel_lista_de_firma_por_seccion(self, request, queryset):
     a un libro de excel una hoja de cálculo por sección con el nombre completo
     del estudiante, el nombre completo de su responsable, DUI y un espacio para firmas
     """
-    secciones = Seccion.objects.prefetch_related(
+    secciones = Seccion.objects.filter(periodo_escolar__periodo_activo=True).prefetch_related(
         Prefetch(
-            "estudiante_set",
+            "estudiantes_en",
             queryset=Estudiante.objects.select_related("responsable").order_by(
                 "apellidos", "nombre"
             ),
@@ -148,7 +148,7 @@ def exportar_a_excel_lista_de_firma_por_seccion(self, request, queryset):
         ws.merge_cells("A5:F5")
         ws.append(["Nº", "Nombre de Padre /Madre o Responsable", "Nº de DUI", "Estudiante", "Sección de estudiante", "Firma"])
         counter = 1
-        for estudiante in seccion.estudiantes:
+        for estudiante in seccion.estudiantes_en.all():
             ws.append([str(counter), estudiante.responsable.__str__(),estudiante.__str__(), seccion.__str__(), ""])
             counter += 1
     

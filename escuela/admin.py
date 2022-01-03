@@ -2,13 +2,17 @@ from django.contrib import admin
 from django.db.models import Count, Q
 
 from personas.models import Estudiante
-from .actions import exportar_datos_de_secciones, exportar_datos_de_grados, exportar_a_excel_lista_de_firma_por_seccion
+from .actions import (
+    exportar_datos_de_secciones,
+    exportar_datos_de_grados,
+    exportar_a_excel_lista_de_firma_por_seccion,
+)
 from .models import Escuela, NivelEducativo, Seccion, PeriodoEscolar
 
 
 class EstudianteInline(admin.TabularInline):
     model = Estudiante
-    fk_name="seccion"
+    fk_name = "seccion"
     fields = ["nombre", "apellidos", "sexo", "fecha_de_nacimiento"]
     extra = 0
     verbose_name_plural = "Estudiantes en la sección"
@@ -45,11 +49,13 @@ class NivelEducativoAdmin(admin.ModelAdmin):
         "estudiantes",
     )
     ordering = ["edad_normal_de_ingreso"]
-    actions = [exportar_datos_de_grados,]
+    actions = [
+        exportar_datos_de_grados,
+    ]
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        queryset = queryset.annotate(
+        queryset = queryset.select_related("nivel_educativo", "periodo_escolar").annotate(
             _total_estudiantes=Count("seccion__estudiante", distinct=True),
             _total_femenino=Count(
                 "seccion__estudiante", filter=Q(seccion__estudiante__sexo="F")
@@ -78,7 +84,13 @@ class NivelEducativoAdmin(admin.ModelAdmin):
 
 @admin.register(Seccion)
 class SeccionAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "femenino", "masculino", "estudiantes")
+    list_display = (
+        "__str__",
+        "periodo_escolar",
+        "femenino",
+        "masculino",
+        "total_estudiantes"
+    )
     ordering = [
         "nivel_educativo__edad_normal_de_ingreso",
         "nivel_educativo",
@@ -89,17 +101,20 @@ class SeccionAdmin(admin.ModelAdmin):
     inlines = [
         EstudianteInline,
     ]
-    actions = [
-        exportar_datos_de_secciones, exportar_a_excel_lista_de_firma_por_seccion
-    ]
+    actions = [exportar_datos_de_secciones, exportar_a_excel_lista_de_firma_por_seccion]
 
     def get_queryset(self, request):
-        queryset = super().get_queryset(request).prefetch_related("periodo_escolar", "nivel_educativo")
-        queryset = queryset.annotate(
-            _total_estudiantes=Count("estudiante", distinct=True),
-            _total_femenino=Count("estudiante", filter=Q(estudiante__sexo="F")),
-            _total_masculino=Count("estudiante", filter=Q(estudiante__sexo="M")),
+        queryset = (
+            super()
+            .get_queryset(request)
+            .filter(periodo_escolar__periodo_activo=True)
+            .select_related("periodo_escolar", "nivel_educativo")
         )
+        queryset = queryset.annotate(
+            _total_estudiantes=Count("estudiantes_en", distinct=True),
+            _total_femenino=Count("estudiantes_en", filter=Q(estudiantes_en__sexo="F")),
+            _total_masculino=Count("estudiantes_en", filter=Q(estudiantes_en__sexo="M")),
+        ).select_related("periodo_escolar")
         return queryset
 
     def get_actions(self, request):
@@ -108,7 +123,7 @@ class SeccionAdmin(admin.ModelAdmin):
             del actions["delete_selected"]
             return actions
 
-    def estudiantes(self, obj):
+    def total_estudiantes(self, obj):
         return obj._total_estudiantes
 
     def femenino(self, obj):

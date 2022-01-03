@@ -1,5 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import models
+from django.db import models, transaction
 
 
 class Escuela(models.Model):
@@ -23,12 +24,30 @@ class PeriodoEscolar(models.Model):
     fecha_de_cierre = models.DateField(
         help_text="Ingrese la fecha de cierre del período escolar"
     )
+    periodo_activo = models.BooleanField(verbose_name="período activo", default=False)
+
+    class Meta:
+        verbose_name_plural = "Períodos Escolares"
 
     def __str__(self):
         return self.nombre
 
-    class Meta:
-        verbose_name_plural = "Períodos Escolares"
+    def clean(self):
+        if self.fecha_de_cierre < self.fecha_de_inicio:
+            raise ValidationError(
+                {
+                    "fecha_de_cierre": "La fecha de cierre debe ser posterior a la fecha de inicio"
+                }
+            )
+        super(PeriodoEscolar, self).clean()
+
+    def save(self, *args, **kwargs):
+        if self.periodo_activo:
+            with transaction.atomic():
+                PeriodoEscolar.objects.filter(periodo_activo=True).update(
+                    periodo_activo=False
+                )
+        super(PeriodoEscolar, self).save(*args, **kwargs)
 
 
 class NivelEducativo(models.Model):
@@ -81,13 +100,13 @@ class Seccion(models.Model):
     )
 
     def total_estudiantes(self):
-        return self.estudiante_set.count()
+        return self.estudiantes_en.count()
 
     def total_femenino(self):
-        return self.estudiante_set.filter(sexo="F").count()
+        return self.estudiantes_en.filter(sexo="F").count()
 
     def total_masculino(self):
-        return self.estudiante_set.filter(sexo="M").count()
+        return self.estudiantes_en.filter(sexo="M").count()
 
     def __str__(self):
         return f"{self.nivel_educativo} {self.seccion}"
