@@ -326,6 +326,19 @@ class Estudiante(Persona):
     def get_absolute_url(self):
         return reverse("admin:personas_estudiante_change", args=(self.pk,))
     
+    def clean(self):
+        if self.seccion:
+            if self.secciones.all():
+                seccion_mayor = self.secciones.order_by("-nivel_educativo__edad_normal_de_ingreso")[0]
+                if self.seccion.nivel_educativo.edad_normal_de_ingreso > seccion_mayor.nivel_educativo.edad_normal_de_ingreso + 1:
+                    raise ValidationError(
+                        {"seccion": "Solo puede matricular a un estudiante en mismo nivel o en el inmediato superior"}
+                    )
+                elif self.seccion.nivel_educativo.edad_normal_de_ingreso < seccion_mayor.nivel_educativo.edad_normal_de_ingreso:
+                    raise ValidationError(
+                        {"seccion": "Un estudiante no puede ser matriculado en un grado inferior a los ya cursados."}
+                    )
+    
     def save(self, *args, **kwargs):
         """
         Mantenemos una y solo una sección de cada período escolar.
@@ -342,3 +355,6 @@ class Estudiante(Persona):
                 finally:
                     self.secciones.add(self.seccion)
         super(Estudiante, self).save(*args, **kwargs)
+    
+
+
