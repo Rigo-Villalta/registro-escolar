@@ -1,8 +1,12 @@
 from django.contrib import admin
-from django.db.models import Count
+from django.db import models
+from django.db.models import Count, fields
+from django.db.models.query import Prefetch
 from django_admin_listfilter_dropdown.filters import (
     ChoiceDropdownFilter,
 )
+
+from escuela.models import Seccion
 
 from .actions import (
     exportar_datos_de_contacto_a_excel,
@@ -57,13 +61,34 @@ class ResponsableAdmin(admin.ModelAdmin):
         return actions
 
 
+class SeccionInline(admin.TabularInline):
+    model= Estudiante.secciones.through
+    fields = ["seccion", "periodo_escolar"]
+    readonly_fields = ["periodo_escolar"]
+    verbose_name_plural = "Historial de secciones"
+
+    def has_change_permission(self, requestt, obj):
+        return False
+    
+    def has_add_permission(self, request, obj) -> bool:
+        return False
+    
+    def has_delete_permission(self, request, obj):
+        return False
+    
+    def periodo_escolar(self, obj):
+        return obj.seccion.periodo_escolar
+    
+    periodo_escolar.short_description = "Período Escolar"
+
+
 class EstudianteAdmin(admin.ModelAdmin):
     list_display = ["__str__", "seccion", "edad", "sexo"]
     ordering = [
         "seccion__nivel_educativo__edad_normal_de_ingreso",
         "seccion",
         "apellidos",
-        "nombre",
+        "nombre"
     ]
     list_filter = (
         ("sexo", ChoiceDropdownFilter),
@@ -72,7 +97,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         "retirado",
         EstaMatriculadoFilter
     )
-    # ["grado_matriculado", "seccion"]
+    inlines = [SeccionInline]
     search_fields = ["nombre", "apellidos"]
     autocomplete_fields = [
         "municipio_de_residencia",
@@ -81,7 +106,6 @@ class EstudianteAdmin(admin.ModelAdmin):
         "estudiantes_en_la_misma_casa",
         "responsable",
         "seccion",
-        "secciones"
     ]
     fieldsets = (
         (
@@ -113,7 +137,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         ),
         (
             "Información escolar",
-            {"fields": ["nie", "escuela_previa", "seccion",  "secciones"]},
+            {"fields": ["nie", "escuela_previa", "seccion"]},
         ),
         (
             "Información complementaria",

@@ -5,7 +5,7 @@ from django.db import models
 from django.urls import reverse
 from smart_selects.db_fields import ChainedForeignKey
 
-from escuela.models import Escuela, Seccion, NivelEducativo
+from escuela.models import Escuela, Seccion
 
 from .helpers import normalizar_nombre_propio
 from .validators import validate_date_is_past
@@ -98,7 +98,9 @@ class Estudiante(Persona):
     nie = models.CharField(
         verbose_name="NIE", max_length=12, blank=True, null=True, unique=True
     )
-    escuela_previa = models.ForeignKey(Escuela, on_delete=models.CASCADE, blank=True, null=True)
+    escuela_previa = models.ForeignKey(
+        Escuela, on_delete=models.CASCADE, blank=True, null=True
+    )
     seccion = models.ForeignKey(
         Seccion,
         verbose_name="Sección",
@@ -106,7 +108,7 @@ class Estudiante(Persona):
         null=True,
         on_delete=models.PROTECT,
         related_name="estudiantes_en",
-        limit_choices_to={"periodo_escolar__periodo_activo": True}
+        limit_choices_to={"periodo_escolar__periodo_activo": True},
     )
     secciones = models.ManyToManyField(Seccion, related_name="estudiantes")
     posee_partida = models.BooleanField(
@@ -323,26 +325,3 @@ class Estudiante(Persona):
 
     def get_absolute_url(self):
         return reverse("admin:personas_estudiante_change", args=(self.pk,))
-
-    def clean(self):
-        try:
-            if (
-                self.seccion2022.nivel_educativo.edad_normal_de_ingreso
-                < self.seccion.nivel_educativo.edad_normal_de_ingreso
-            ):
-                raise ValidationError(
-                    {
-                        "seccion2022": "El Estudiante no puede ser matriculado en un grado inferior al del año anterior"
-                    }
-                )
-            elif (
-                self.seccion2022.nivel_educativo.edad_normal_de_ingreso
-                > self.seccion.nivel_educativo.edad_normal_de_ingreso + 1
-            ):
-                raise ValidationError(
-                    {
-                        "seccion2022": "El Estudiante no puede ser promovido dos o más niveles educativos."
-                    }
-                )
-        except:
-            pass
