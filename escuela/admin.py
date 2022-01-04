@@ -46,6 +46,7 @@ class NivelEducativoAdmin(admin.ModelAdmin):
         "edad_de_ingreso_al_nivel",
         "femenino",
         "masculino",
+        "estudiantes_con_sobreedad",
         "estudiantes",
     )
     ordering = ["edad_normal_de_ingreso"]
@@ -55,14 +56,14 @@ class NivelEducativoAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        queryset = queryset.select_related("nivel_educativo", "periodo_escolar").annotate(
-            _total_estudiantes=Count("seccion__estudiante", distinct=True),
+        queryset = queryset.annotate(
+            _total_estudiantes=Count("seccion__estudiantes_en", distinct=True),
             _total_femenino=Count(
-                "seccion__estudiante", filter=Q(seccion__estudiante__sexo="F")
+                "seccion__estudiantes_en", filter=Q(seccion__estudiantes_en__sexo="F")
             ),
             _total_masculino=Count(
-                "seccion__estudiante", filter=Q(seccion__estudiante__sexo="M")
-            ),
+                "seccion__estudiantes_en", filter=Q(seccion__estudiantes_en__sexo="M")
+            )
         )
         return queryset
 
@@ -74,6 +75,14 @@ class NivelEducativoAdmin(admin.ModelAdmin):
 
     def masculino(self, obj):
         return obj._total_masculino
+    
+    def estudiantes_con_sobreedad(self, obj):
+        total = 0
+        for seccion in obj.seccion_set.filter(periodo_escolar__periodo_activo=True):
+            for estudiante in seccion.estudiantes_en.all():
+                if estudiante.sobreedad():
+                    total += 1
+        return total
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -89,6 +98,7 @@ class SeccionAdmin(admin.ModelAdmin):
         "periodo_escolar",
         "femenino",
         "masculino",
+        "estudiantes_con_sobreedad",
         "total_estudiantes"
     )
     ordering = [
@@ -131,6 +141,13 @@ class SeccionAdmin(admin.ModelAdmin):
 
     def masculino(self, obj):
         return obj._total_masculino
+    
+    def estudiantes_con_sobreedad(self, obj):
+        total = 0
+        for estudiante in obj.estudiantes_en.all():
+            if estudiante.sobreedad():
+                total += 1
+        return total
 
 
 admin.site.register(Escuela, EscuelaAdmin)

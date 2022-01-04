@@ -1,7 +1,5 @@
 from django.contrib import admin
-from django.db import models
-from django.db.models import Count, fields
-from django.db.models.query import Prefetch
+from django.db.models.query_utils import Q
 from django_admin_listfilter_dropdown.filters import (
     ChoiceDropdownFilter,
 )
@@ -62,40 +60,40 @@ class ResponsableAdmin(admin.ModelAdmin):
 
 
 class SeccionInline(admin.TabularInline):
-    model= Estudiante.secciones.through
+    model = Estudiante.secciones.through
     fields = ["seccion", "periodo_escolar"]
     readonly_fields = ["periodo_escolar"]
     verbose_name_plural = "Historial de secciones"
 
     def has_change_permission(self, requestt, obj):
         return False
-    
+
     def has_add_permission(self, request, obj) -> bool:
         return False
-    
+
     def has_delete_permission(self, request, obj):
         return False
-    
+
     def periodo_escolar(self, obj):
         return obj.seccion.periodo_escolar
-    
+
     periodo_escolar.short_description = "Período Escolar"
 
 
 class EstudianteAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "seccion", "edad", "sexo"]
+    list_display = ["__str__", "seccion", "edad", "sobreedad", "sexo"]
     ordering = [
         "seccion__nivel_educativo__edad_normal_de_ingreso",
         "seccion",
         "apellidos",
-        "nombre"
+        "nombre",
     ]
     list_filter = (
         ("sexo", ChoiceDropdownFilter),
         NivelEducativoFilter,
         SeccionFilter,
         "retirado",
-        EstaMatriculadoFilter
+        EstaMatriculadoFilter,
     )
     inlines = [SeccionInline]
     search_fields = ["nombre", "apellidos"]
@@ -105,7 +103,6 @@ class EstudianteAdmin(admin.ModelAdmin):
         "escuela_previa",
         "estudiantes_en_la_misma_casa",
         "responsable",
-        "seccion",
     ]
     fieldsets = (
         (
@@ -245,6 +242,49 @@ class EstudianteAdmin(admin.ModelAdmin):
             .select_related("seccion__nivel_educativo")
             .filter(retirado=False)
         )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "seccion":
+            try:
+                id_estudiante = request.META["PATH_INFO"].rstrip("/").split("/")[-2]
+                estudiante = Estudiante.objects.get(pk=id_estudiante)
+                seccion_mayor = estudiante.secciones.filter(
+                    periodo_escolar__periodo_activo=False
+                ).order_by("-nivel_educativo__edad_normal_de_ingreso")[0]
+                if 7 < seccion_mayor.nivel_educativo.edad_normal_de_ingreso < 12:
+                    kwargs["queryset"] = (
+                        Seccion.objects.select_related(
+                            "nivel_educativo", "periodo_escolar"
+                        )
+                        .filter(
+                            Q(periodo_escolar__periodo_activo=True),
+                            Q(nivel_educativo=seccion_mayor.nivel_educativo)
+                            | Q(
+                                nivel_educativo__edad_normal_de_ingreso=seccion_mayor.nivel_educativo.edad_normal_de_ingreso
+                                + 1
+                            )
+                            | Q(nivel_educativo__edad_normal_de_ingreso=12),
+                        )
+                        .order_by("nivel_educativo__edad_normal_de_ingreso", "seccion")
+                    )
+                else:
+                    kwargs["queryset"] = (
+                        Seccion.objects.select_related(
+                            "nivel_educativo", "periodo_escolar"
+                        )
+                        .filter(
+                            Q(periodo_escolar__periodo_activo=True),
+                            Q(nivel_educativo=seccion_mayor.nivel_educativo)
+                            | Q(
+                                nivel_educativo__edad_normal_de_ingreso=seccion_mayor.nivel_educativo.edad_normal_de_ingreso
+                                + 1
+                            ),
+                        )
+                        .order_by("nivel_educativo__edad_normal_de_ingreso", "seccion")
+                    )
+            except:
+                pass
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel"

@@ -1,4 +1,5 @@
 import datetime
+from django.contrib import admin
 from django.core.exceptions import ValidationError
 
 from django.db import models
@@ -322,6 +323,13 @@ class Estudiante(Persona):
 
     def __str__(self):
         return f"{self.apellidos}, {self.nombre} "
+    
+
+    @admin.display(boolean=True)
+    def sobreedad(self):
+        if self.seccion:
+            return self.edad > self.seccion.nivel_educativo.edad_normal_de_ingreso + 1
+        return False
 
     def get_absolute_url(self):
         return reverse("admin:personas_estudiante_change", args=(self.pk,))
