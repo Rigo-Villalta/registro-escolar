@@ -351,6 +351,7 @@ class Estudiante(Persona):
         """
         Mantenemos una y solo una sección de cada período escolar.
         """
+        super(Estudiante, self).save(*args, **kwargs)
         if self.seccion:
             if self.seccion in self.secciones.all():
                 pass
@@ -362,7 +363,3 @@ class Estudiante(Persona):
                     pass
                 finally:
                     self.secciones.add(self.seccion)
-        super(Estudiante, self).save(*args, **kwargs)
-    
-
-
