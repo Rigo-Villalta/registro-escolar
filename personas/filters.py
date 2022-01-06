@@ -20,19 +20,19 @@ class SeccionFilter(admin.SimpleListFilter):
         """
         search = request.GET.get("nivel_educativo")
         if search:
-            return [
-                (seccion.id, seccion.__str__)
-                for seccion in Seccion.objects.filter(
+            return list(
+                Seccion.objects.filter(
                     nivel_educativo=search, periodo_escolar__periodo_activo=True
-                ).select_related("nivel_educativo")
-            ]
+                )
+                .select_related("nivel_educativo")
+                .values_list("id", "__str__")
+            )
         else:
-            return [
-                (seccion.id, seccion.__str__)
-                for seccion in Seccion.objects.filter(
-                    periodo_escolar__periodo_activo=True
-                ).select_related("nivel_educativo")
-            ]
+            return list(
+                Seccion.objects.filter(periodo_escolar__periodo_activo=True)
+                .select_related("nivel_educativo")
+                .values_list("id", "__str__")
+            )
 
     def queryset(self, request, queryset):
         if self.value():
@@ -50,11 +50,8 @@ class NivelEducativoFilter(admin.SimpleListFilter):
     parameter_name = "nivel_educativo"
 
     def lookups(self, request, model_admin):
-        return [
-            (nivel_educativo.id, nivel_educativo.__str__)
-            for nivel_educativo in NivelEducativo.objects.all()
-        ]
-
+        return list(NivelEducativo.objects.values_list("id", "nivel"))
+        
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(seccion__nivel_educativo__id=self.value())
