@@ -114,4 +114,4 @@ class Seccion(models.Model):
     class Meta:
         verbose_name = "Sección"
         verbose_name_plural = "Secciones"
-        ordering = ("seccion",)
+        ordering = ["nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion"]

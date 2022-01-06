@@ -15,7 +15,7 @@ from .actions import (
     exportar_a_excel_estudiantes_y_responsables_por_seccion,
     exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
 )
-from .filters import SeccionFilter, NivelEducativoFilter, EstaMatriculadoFilter
+from .filters import SeccionFilter, NivelEducativoFilter, MatriculadoFilter
 from .models import (
     Departamento,
     Estudiante,
@@ -94,13 +94,14 @@ class EstudianteAdmin(admin.ModelAdmin):
         NivelEducativoFilter,
         SeccionFilter,
         "retirado",
-        EstaMatriculadoFilter,
+        MatriculadoFilter,
     )
     inlines = [SeccionInline]
     search_fields = ["nombre", "apellidos"]
     autocomplete_fields = [
         "municipio_de_residencia",
         "municipio_de_nacimiento",
+        "seccion",
         "escuela_previa",
         "estudiantes_en_la_misma_casa",
         "responsable",
@@ -243,7 +244,8 @@ class EstudianteAdmin(admin.ModelAdmin):
             .select_related("seccion__nivel_educativo")
             .filter(retirado=False)
         )
-
+    
+    """
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "seccion":
             try:
@@ -286,7 +288,7 @@ class EstudianteAdmin(admin.ModelAdmin):
             except:
                 pass
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
+    """
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel"
 exportar_a_excel_estudiantes_y_responsables_por_seccion.short_description = (

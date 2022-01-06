@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.db.models import Count, Q
 from django.db.models.query import Prefetch, QuerySet
+from personas import filters
 
 from personas.models import Estudiante
 from .actions import (
@@ -92,15 +93,9 @@ class SeccionAdmin(admin.ModelAdmin):
         "periodo_escolar",
         "femenino",
         "masculino",
-        #"estudiantes_con_sobreedad",
         "total_estudiantes",
     )
-    ordering = [
-        "nivel_educativo__edad_normal_de_ingreso",
-        "nivel_educativo",
-        "seccion",
-    ]
-    search_fields = ["__str__"]
+    search_fields = ["nivel_educativo__nivel"]
     list_filter = [SeccionPorPeriodoFilter]
     inlines = [
         EstudianteInline,
@@ -108,21 +103,16 @@ class SeccionAdmin(admin.ModelAdmin):
     actions = [exportar_datos_de_secciones, exportar_a_excel_lista_de_firma_por_seccion]
 
     def get_queryset(self, request):
-        search = request.GET.get("periodo_escolar")
+        #filter = request.GET.get("periodo_escolar")
         queryset = (
-            Seccion.objects
-            .select_related("periodo_escolar", "nivel_educativo")
+            Seccion.objects.select_related("periodo_escolar", "nivel_educativo")
             .prefetch_related(Prefetch("estudiantes"))
             .annotate(
                 _total_estudiantes=Count("estudiantes", distinct=True),
-                _total_femenino=Count(
-                    "estudiantes", filter=Q(estudiantes__sexo="F")
-                ),
-                _total_masculino=Count(
-                    "estudiantes", filter=Q(estudiantes__sexo="M")
-                ),
+                _total_femenino=Count("estudiantes", filter=Q(estudiantes__sexo="F")),
+                _total_masculino=Count("estudiantes", filter=Q(estudiantes__sexo="M")),
             )
-        )
+        ).order_by("nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion")
         return queryset
 
     def get_actions(self, request):
@@ -130,6 +120,57 @@ class SeccionAdmin(admin.ModelAdmin):
         if "delete_selected" in actions:
             del actions["delete_selected"]
             return actions
+    
+    def get_search_results(self, request, queryset, search_term):
+        """
+        Sobreescribimos este método para que los resultados de la búsqueda 
+        """
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        url_referida = request.META.get('HTTP_REFERER').rstrip("/").split("/")
+        try:
+            if url_referida[5] == "estudiante" and url_referida[7] == "change":
+                try:
+                    id_estudiante = url_referida[6]
+                    estudiante = Estudiante.objects.get(pk=id_estudiante)
+                    seccion_mayor = estudiante.secciones.filter(
+                            periodo_escolar__periodo_activo=False
+                        ).order_by("-nivel_educativo__edad_normal_de_ingreso")[0]
+                    if 7 < seccion_mayor.nivel_educativo.edad_normal_de_ingreso < 12:
+                        queryset = (
+                            Seccion.objects.select_related(
+                                "nivel_educativo", "periodo_escolar"
+                            )
+                            .filter(
+                                Q(periodo_escolar__periodo_activo=True),
+                                Q(nivel_educativo=seccion_mayor.nivel_educativo)
+                                | Q(
+                                    nivel_educativo__edad_normal_de_ingreso=seccion_mayor.nivel_educativo.edad_normal_de_ingreso
+                                    + 1
+                                )
+                                | Q(nivel_educativo__edad_normal_de_ingreso=12),
+                            )
+                            .order_by("nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion")
+                        )
+                    else:
+                        queryset = (
+                            Seccion.objects.select_related(
+                                "nivel_educativo", "periodo_escolar"
+                            )
+                            .filter(
+                                Q(periodo_escolar__periodo_activo=True),
+                                Q(nivel_educativo=seccion_mayor.nivel_educativo)
+                                | Q(
+                                    nivel_educativo__edad_normal_de_ingreso=seccion_mayor.nivel_educativo.edad_normal_de_ingreso
+                                    + 1
+                                ),
+                            )
+                            .order_by("nivel_educativo__edad_normal_de_ingreso", "seccion")
+                        )
+                except:
+                    pass
+        except:
+            pass
+        return queryset, use_distinct
 
     def total_estudiantes(self, obj):
         return obj._total_estudiantes
@@ -139,14 +180,6 @@ class SeccionAdmin(admin.ModelAdmin):
 
     def masculino(self, obj):
         return obj._total_masculino
-
-
-    #def estudiantes_con_sobreedad(self, obj):
-     #   total = 0
-      #  for estudiante in obj.estudiantes.all():
-       #     if estudiante.sobreedad():
-        #        total += 1
-        #return total
 
 
 admin.site.register(Escuela, EscuelaAdmin)

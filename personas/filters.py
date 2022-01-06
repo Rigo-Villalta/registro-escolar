@@ -60,7 +60,7 @@ class NivelEducativoFilter(admin.SimpleListFilter):
             return queryset.filter(seccion__nivel_educativo__id=self.value())
 
 
-class EstaMatriculadoFilter(admin.SimpleListFilter):
+class MatriculadoFilter(admin.SimpleListFilter):
     """
     Filtro para ver estudiantes matriculados y los que no tienen sección
     """
