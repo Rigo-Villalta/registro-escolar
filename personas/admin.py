@@ -237,58 +237,14 @@ class EstudianteAdmin(admin.ModelAdmin):
         search = request.GET.get("retirado__exact")
         change = request.GET.get("_changelist_filters")
         if search or change:
-            return super().get_queryset(request)
+            return super().get_queryset(request).select_related("seccion__nivel_educativo")
         return (
             super()
             .get_queryset(request)
             .select_related("seccion__nivel_educativo")
             .filter(retirado=False)
         )
-    
-    """
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "seccion":
-            try:
-                id_estudiante = request.META["PATH_INFO"].rstrip("/").split("/")[-2]
-                estudiante = Estudiante.objects.get(pk=id_estudiante)
-                seccion_mayor = estudiante.secciones.filter(
-                    periodo_escolar__periodo_activo=False
-                ).order_by("-nivel_educativo__edad_normal_de_ingreso")[0]
-                if 7 < seccion_mayor.nivel_educativo.edad_normal_de_ingreso < 12:
-                    kwargs["queryset"] = (
-                        Seccion.objects.select_related(
-                            "nivel_educativo", "periodo_escolar"
-                        )
-                        .filter(
-                            Q(periodo_escolar__periodo_activo=True),
-                            Q(nivel_educativo=seccion_mayor.nivel_educativo)
-                            | Q(
-                                nivel_educativo__edad_normal_de_ingreso=seccion_mayor.nivel_educativo.edad_normal_de_ingreso
-                                + 1
-                            )
-                            | Q(nivel_educativo__edad_normal_de_ingreso=12),
-                        )
-                        .order_by("nivel_educativo__edad_normal_de_ingreso", "seccion")
-                    )
-                else:
-                    kwargs["queryset"] = (
-                        Seccion.objects.select_related(
-                            "nivel_educativo", "periodo_escolar"
-                        )
-                        .filter(
-                            Q(periodo_escolar__periodo_activo=True),
-                            Q(nivel_educativo=seccion_mayor.nivel_educativo)
-                            | Q(
-                                nivel_educativo__edad_normal_de_ingreso=seccion_mayor.nivel_educativo.edad_normal_de_ingreso
-                                + 1
-                            ),
-                        )
-                        .order_by("nivel_educativo__edad_normal_de_ingreso", "seccion")
-                    )
-            except:
-                pass
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-    """
+
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel"
 exportar_a_excel_estudiantes_y_responsables_por_seccion.short_description = (
