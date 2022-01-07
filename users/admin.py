@@ -47,6 +47,7 @@ class CustomUserAdmin(UserAdmin):
 
     list_display = ("username", "email", "last_name", "first_name", "tipo_de_usuario")
     readonly_fields = ("last_login", "date_joined")
+    list_filter = ["groups"]
 
     def get_actions(self, request):
         actions = super().get_actions(request)
