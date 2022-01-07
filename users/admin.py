@@ -45,15 +45,11 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
-    list_display = (
-        "username",
-        "email",
-        "last_name",
-        "first_name",
-    )
+    list_display = ("username", "email", "last_name", "first_name", "tipo_de_usuario")
+    readonly_fields = ("last_login", "date_joined")
 
-    def get_readonly_fields(self, request, obj=None):
-        if obj is None:
-            return ("last_login", "date_joined")
-        else:
-            return ("last_login", "date_joined", "user_type")
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
