@@ -55,7 +55,6 @@ class EscuelaAdmin(admin.AdminSite):
         }
         app_dict = self._build_app_dict(request)
         # Se sobreescribe el orden de las apps
-        print(app_dict)
         app_list = sorted(
             app_dict.values(), key=lambda x: ordering_apps[x["name"].lower()]
         )
