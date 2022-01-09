@@ -6,7 +6,6 @@ from escuela.admin import escuela_admin
 from .models import User
 
 
-
 class CustomUserAdmin(UserAdmin):
     """
     Usuario admin.
