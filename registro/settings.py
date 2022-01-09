@@ -113,4 +113,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 AUTH_USER_MODEL = "users.User"
 
-LOGIN_URL = "/admin/login/"
+LOGIN_URL = "/administracion/login/"

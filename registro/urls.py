@@ -36,7 +36,7 @@ urlpatterns = [
         PasswordResetCompleteView.as_view(),
         name="password_reset_complete",
     ),
-    path("", RedirectView.as_view(url="admin/")),
+    path("", RedirectView.as_view(url="administracion/")),
     path("admin/", admin.site.urls),
     path("administracion/", escuela_admin.urls),
     path("chaining/", include("smart_selects.urls")),
