@@ -100,13 +100,17 @@ USE_L10N = True
 
 USE_TZ = True
 
-INTERNAL_IPS = ['127.0.0.1',]
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
+
+LOGIN_URL = "/admin/login/"
