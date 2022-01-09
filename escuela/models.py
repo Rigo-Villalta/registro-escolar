@@ -27,7 +27,7 @@ class PeriodoEscolar(models.Model):
     periodo_activo = models.BooleanField(verbose_name="período activo", default=False)
 
     class Meta:
-        verbose_name_plural = "Períodos Escolares"
+        verbose_name_plural = "períodos escolares"
 
     def __str__(self):
         return self.nombre
@@ -85,7 +85,8 @@ class NivelEducativo(models.Model):
         return f"{self.edad_normal_de_ingreso} años."
 
     class Meta:
-        verbose_name_plural = "Niveles educativos."
+        verbose_name = "nivel educativo"
+        verbose_name_plural = "niveles educativos"
         ordering = ["edad_normal_de_ingreso", "nivel"]
 
 
@@ -112,6 +113,6 @@ class Seccion(models.Model):
         return f"{self.nivel_educativo} {self.seccion}"
 
     class Meta:
-        verbose_name = "Sección"
-        verbose_name_plural = "Secciones"
+        verbose_name = "sección"
+        verbose_name_plural = "secciones"
         ordering = ["nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion"]

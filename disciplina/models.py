@@ -23,8 +23,8 @@ class FaltaDisciplinariaEstudiantil(models.Model):
     descripcion = models.TextField(verbose_name="Descripción")
 
     class Meta:
-        verbose_name = "Falta disciplinaria de estudiante"
-        verbose_name_plural = "Faltas disciplinarias de estudiantes"
+        verbose_name = "falta disciplinaria de estudiante"
+        verbose_name_plural = "faltas disciplinarias de estudiantes"
 
     def __str__(self):
         return f'{self.falta.descripcion}, {self.fecha}'
