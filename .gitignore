@@ -5,3 +5,4 @@
 settings_local.py
 log.txt
 activate
+*:Zone.Identifier
