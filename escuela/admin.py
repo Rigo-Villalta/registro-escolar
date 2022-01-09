@@ -1,7 +1,7 @@
 from django.contrib import admin
+from django.utils.text import capfirst
 from django.db.models import Count, Q
-from django.db.models.query import Prefetch, QuerySet
-from personas import filters
+from django.db.models.query import Prefetch
 
 from personas.models import Estudiante
 from .actions import (
@@ -12,6 +12,62 @@ from .actions import (
 
 from .filters import SeccionPorPeriodoFilter
 from .models import Escuela, NivelEducativo, Seccion, PeriodoEscolar
+
+
+class EscuelaAdmin(admin.AdminSite):
+    """
+    Us sitio administrativo derivado de Django Admin con el propósito
+    de sobreescribir ciertos comportamientos.
+    """
+
+    def get_app_list(self, request):
+        """
+        RIGO: He sobreescrito este método para que se pueda hacer un orden
+        personalizado de los modelos y aplicaciones en el índice del admin.
+        Para ello es necesario ingresar el verbose_name_plural de cada
+        aplicación o model como clave de los diccionarios 'ordering apps' y
+        'ordering_models'respectivamente y el número de prioridad que le
+        queremos dar como valor. Dos modelos pueden tener el mismo número
+        de prioridad si son de diferentes aplicaciones.
+        OJO: Es responsabilidad del programador ingresar las aplicaciones y
+        modelos que se registran en el SchoolAdmin o se obtendrá
+        un error de ejecución al correr el sitio.
+        """
+        ordering_apps = {"usuarios": 1, "personas": 2, "escuela": 3, "disciplina": 4}
+        # En ordering_models es importante usar capfirst para que iguale
+        # el diccionario creado por el método _build_app_dict
+        ordering_models = {
+            # Users
+            capfirst("usuarios"): 1,
+            # Personas
+            capfirst("estudiantes"): 1,
+            capfirst("responsables"): 2,
+            capfirst("departamentos"): 3,
+            capfirst("municipios"): 4,
+            # Escuela
+            capfirst("períodos escolares"): 1,
+            capfirst("niveles educativos"): 2,
+            capfirst("escuelas"): 3,
+            capfirst("secciones"): 3,
+            # Disciplina
+            capfirst("faltas"): 1,
+            capfirst("Faltas disciplinarias de estudiantes"): 2,
+        }
+        app_dict = self._build_app_dict(request)
+        # Se sobreescribe el orden de las apps
+        print(app_dict)
+        app_list = sorted(
+            app_dict.values(), key=lambda x: ordering_apps[x["name"].lower()]
+        )
+
+        # Se sobreescribe el orden de los modelos
+        for app in app_list:
+            app["models"].sort(key=lambda x: ordering_models[x["name"]])
+
+        return app_list
+
+
+escuela_admin = EscuelaAdmin(name="escuela_admin")
 
 
 class EstudianteInline(admin.TabularInline):
@@ -103,7 +159,7 @@ class SeccionAdmin(admin.ModelAdmin):
     actions = [exportar_datos_de_secciones, exportar_a_excel_lista_de_firma_por_seccion]
 
     def get_queryset(self, request):
-        #filter = request.GET.get("periodo_escolar")
+        # filter = request.GET.get("periodo_escolar")
         queryset = (
             Seccion.objects.select_related("periodo_escolar", "nivel_educativo")
             .prefetch_related(Prefetch("estudiantes"))
@@ -112,7 +168,9 @@ class SeccionAdmin(admin.ModelAdmin):
                 _total_femenino=Count("estudiantes", filter=Q(estudiantes__sexo="F")),
                 _total_masculino=Count("estudiantes", filter=Q(estudiantes__sexo="M")),
             )
-        ).order_by("nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion")
+        ).order_by(
+            "nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion"
+        )
         return queryset
 
     def get_actions(self, request):
@@ -120,21 +178,23 @@ class SeccionAdmin(admin.ModelAdmin):
         if "delete_selected" in actions:
             del actions["delete_selected"]
             return actions
-    
+
     def get_search_results(self, request, queryset, search_term):
         """
-        Sobreescribimos este método para que los resultados de la búsqueda 
+        Sobreescribimos este método para que los resultados de la búsqueda
         """
-        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
-        url_referida = request.META.get('HTTP_REFERER').rstrip("/").split("/")
+        queryset, use_distinct = super().get_search_results(
+            request, queryset, search_term
+        )
+        url_referida = request.META.get("HTTP_REFERER").rstrip("/").split("/")
         try:
             if url_referida[5] == "estudiante" and url_referida[7] == "change":
                 try:
                     id_estudiante = url_referida[6]
                     estudiante = Estudiante.objects.get(pk=id_estudiante)
                     seccion_mayor = estudiante.secciones.filter(
-                            periodo_escolar__periodo_activo=False
-                        ).order_by("-nivel_educativo__edad_normal_de_ingreso")[0]
+                        periodo_escolar__periodo_activo=False
+                    ).order_by("-nivel_educativo__edad_normal_de_ingreso")[0]
                     if 7 < seccion_mayor.nivel_educativo.edad_normal_de_ingreso < 12:
                         queryset = (
                             Seccion.objects.select_related(
@@ -149,7 +209,11 @@ class SeccionAdmin(admin.ModelAdmin):
                                 )
                                 | Q(nivel_educativo__edad_normal_de_ingreso=12),
                             )
-                            .order_by("nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion")
+                            .order_by(
+                                "nivel_educativo__edad_normal_de_ingreso",
+                                "nivel_educativo",
+                                "seccion",
+                            )
                         )
                     else:
                         queryset = (
@@ -164,7 +228,9 @@ class SeccionAdmin(admin.ModelAdmin):
                                     + 1
                                 ),
                             )
-                            .order_by("nivel_educativo__edad_normal_de_ingreso", "seccion")
+                            .order_by(
+                                "nivel_educativo__edad_normal_de_ingreso", "seccion"
+                            )
                         )
                 except:
                     pass
@@ -185,3 +251,8 @@ class SeccionAdmin(admin.ModelAdmin):
 admin.site.register(Escuela, EscuelaAdmin)
 admin.site.register(NivelEducativo, NivelEducativoAdmin)
 admin.site.register(PeriodoEscolar)
+
+escuela_admin.register(Escuela, EscuelaAdmin)
+escuela_admin.register(NivelEducativo, NivelEducativoAdmin)
+escuela_admin.register(PeriodoEscolar)
+escuela_admin.register(Seccion, SeccionAdmin)

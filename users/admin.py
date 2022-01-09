@@ -1,12 +1,12 @@
 from django.contrib import admin
-from django.contrib.admin.decorators import register
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
+from escuela.admin import escuela_admin
 from .models import User
 
 
-@register(User)
+
 class CustomUserAdmin(UserAdmin):
     """
     Usuario admin.
@@ -54,3 +54,7 @@ class CustomUserAdmin(UserAdmin):
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions
+
+
+escuela_admin.register(User, CustomUserAdmin)
+admin.site.register(User, CustomUserAdmin)

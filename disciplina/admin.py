@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from escuela.admin import escuela_admin
+
 from .models import Falta, FaltaDisciplinariaEstudiantil
 
 class FaltaAdmin(admin.ModelAdmin):
@@ -14,3 +16,6 @@ class FaltaDisciplinariaEstudiantilAdmin(admin.ModelAdmin):
 
 admin.site.register(Falta, FaltaAdmin)
 admin.site.register(FaltaDisciplinariaEstudiantil, FaltaDisciplinariaEstudiantilAdmin)
+
+escuela_admin.register(Falta, FaltaAdmin)
+escuela_admin.register(FaltaDisciplinariaEstudiantil, FaltaDisciplinariaEstudiantilAdmin)

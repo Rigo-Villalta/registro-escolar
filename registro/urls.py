@@ -12,6 +12,8 @@ from django.contrib.auth.views import (
 from django.urls import include, path
 from django.views.generic.base import RedirectView
 
+from escuela.admin import escuela_admin
+
 
 urlpatterns = [
     path(
@@ -36,6 +38,7 @@ urlpatterns = [
     ),
     path("", RedirectView.as_view(url="admin/")),
     path("admin/", admin.site.urls),
+    path("administracion/", escuela_admin.urls),
     path("chaining/", include("smart_selects.urls")),
     path("__debug__/", include(urls)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

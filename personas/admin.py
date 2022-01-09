@@ -5,7 +5,7 @@ from django_admin_listfilter_dropdown.filters import (
     ChoiceDropdownFilter,
 )
 
-from escuela.models import Seccion
+from escuela.admin import escuela_admin
 
 from .actions import (
     exportar_datos_de_contacto_a_excel,
@@ -282,3 +282,9 @@ admin.site.register(Departamento)
 admin.site.register(Estudiante, EstudianteAdmin)
 admin.site.register(Municipio, MunicipioAdmin)
 admin.site.register(Responsable, ResponsableAdmin)
+
+
+escuela_admin.register(Departamento)
+escuela_admin.register(Estudiante, EstudianteAdmin)
+escuela_admin.register(Municipio, MunicipioAdmin)
+escuela_admin.register(Responsable, ResponsableAdmin)
