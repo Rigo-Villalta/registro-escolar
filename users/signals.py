@@ -13,18 +13,21 @@ def agregar_usuario_a_grup(sender, instance, created, **kwargs):
     if instance.es_administrador():
         try:
             administradores = Group.objects.get(name="Administradores")
+            instance.groups.clear()
             instance.groups.add(administradores)
         except:
             pass
     elif instance.es_profesor():
         try:
             profesores = Group.objects.get(name="Profesores")
+            instance.groups.clear()
             instance.groups.add(profesores)
         except:
             pass
     elif instance.es_digitador():
         try:
             digitadores = Group.objects.get(name="Digitadores")
+            instance.groups.clear()
             instance.groups.add(digitadores)
         except:
             pass
