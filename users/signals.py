@@ -6,9 +6,10 @@ from .models import User
 
 
 @receiver(post_save, sender=User)
-def agregar_usuario_a_grup(sender, instance, created, **kwargs):
+def agregar_usuario_a_grupo(sender, instance, created, **kwargs):
     """
     Django Signal que agrega un usuario a un grupo.
+    Un usuario se mantiene en uno y solo un grupo
     """
     if instance.es_administrador():
         try:
