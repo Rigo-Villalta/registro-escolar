@@ -1,10 +1,10 @@
 import datetime
+
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 
 from django.db import models
 from django.urls import reverse
-from smart_selects.db_fields import ChainedForeignKey
 
 from escuela.models import Escuela, Seccion
 
