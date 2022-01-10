@@ -42,13 +42,12 @@ class EscuelaAdmin(admin.AdminSite):
             # Personas
             capfirst("estudiantes"): 1,
             capfirst("responsables"): 2,
-            capfirst("departamentos"): 3,
-            capfirst("municipios"): 4,
+            capfirst("municipios"): 3,
             # Escuela
-            capfirst("períodos escolares"): 1,
-            capfirst("niveles educativos"): 2,
-            capfirst("escuelas"): 3,
-            capfirst("secciones"): 3,
+            capfirst("escuelas"): 1,
+            capfirst("períodos escolares"): 2,
+            capfirst("niveles educativos"): 3,
+            capfirst("secciones"): 4,
             # Disciplina
             capfirst("faltas"): 1,
             capfirst("Faltas disciplinarias de estudiantes"): 2,
