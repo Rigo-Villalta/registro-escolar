@@ -272,7 +272,7 @@ class MunicipioAdmin(admin.ModelAdmin):
             super()
             .get_queryset(request)
             .prefetch_related("departamento")
-            .annotate(_estudiantes_residentes=Count("reside_en"))
+            .annotate(_estudiantes_residentes=Count("reside_en", filter=Q(reside_en__seccion__isnull=False)))
             .order_by("-_estudiantes_residentes")
         )
 
