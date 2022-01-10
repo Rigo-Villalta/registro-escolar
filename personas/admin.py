@@ -237,7 +237,9 @@ class EstudianteAdmin(admin.ModelAdmin):
         search = request.GET.get("retirado__exact")
         change = request.GET.get("_changelist_filters")
         if search or change:
-            return super().get_queryset(request).select_related("seccion__nivel_educativo")
+            return (
+                super().get_queryset(request).select_related("seccion__nivel_educativo")
+            )
         return (
             super()
             .get_queryset(request)
@@ -278,13 +280,20 @@ class MunicipioAdmin(admin.ModelAdmin):
         return obj._estudiantes_residentes
 
 
-admin.site.register(Departamento)
+class DepartamentoAdmin(admin.ModelAdmin):
+    search_fields = ["nombre"]
+
+    def has_module_permission(self, request):
+        return False
+
+
+admin.site.register(Departamento, DepartamentoAdmin)
 admin.site.register(Estudiante, EstudianteAdmin)
 admin.site.register(Municipio, MunicipioAdmin)
 admin.site.register(Responsable, ResponsableAdmin)
 
 
-escuela_admin.register(Departamento)
+escuela_admin.register(Departamento, DepartamentoAdmin)
 escuela_admin.register(Estudiante, EstudianteAdmin)
 escuela_admin.register(Municipio, MunicipioAdmin)
 escuela_admin.register(Responsable, ResponsableAdmin)
