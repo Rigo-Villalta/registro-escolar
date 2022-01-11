@@ -13,7 +13,7 @@ from .actions import (
     exportar_todos_los_datos_a_excel,
     exportar_a_excel_datos_completos_de_responsables,
     exportar_a_excel_estudiantes_y_responsables_por_seccion,
-    exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
+    exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion
 )
 from .filters import SeccionFilter, NivelEducativoFilter, MatriculadoFilter
 from .models import (
@@ -221,7 +221,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         exportar_datos_de_contacto_a_excel,
         exportar_todos_los_datos_a_excel,
         exportar_a_excel_estudiantes_y_responsables_por_seccion,
-        exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
+        exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion
     ]
 
     class Media:

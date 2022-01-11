@@ -13,6 +13,19 @@ def exportar_todos_los_datos_a_excel(self, request, queryset):
     la librería openpyxl ver: openpyxl.readthedocs.io
     """
 
+    import datetime
+    
+    print("Antes de queryset: ", datetime.datetime.now())
+    queryset = queryset.select_related(
+        "escuela_previa",
+        "seccion",
+        "municipio_de_nacimiento",
+        "municipio_de_residencia",
+        "responsable",
+    ).prefetch_related("secciones", "estudiantes_en_la_misma_casa")
+
+    print("Después de queryset y al crear archivo: ", datetime.datetime.now())
+
     meta = self.model._meta
     field_names = [field.name for field in meta.fields]
 
@@ -24,6 +37,9 @@ def exportar_todos_los_datos_a_excel(self, request, queryset):
 
     for obj in queryset:
         ws.append([str(getattr(obj, field)) for field in field_names])
+    
+    print("Después de crear el archivo: ", datetime.datetime.now())
+
 
     with NamedTemporaryFile() as tmp:
         wb.save(tmp.name)
@@ -46,6 +62,7 @@ def exportar_datos_de_contacto_a_excel(self, request, queryset):
     Estudiante, de todos los estudiantes en el queryset, haciendo uso de
     la librería openpyxl ver: openpyxl.readthedocs.io
     """
+    queryset = queryset.select_related("responsable")
     wb = Workbook()
     ws = wb.active
     ws.title = "Estudiantes - contactos"
@@ -282,7 +299,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion(
     # para ello pasamos el query a values
     estudiantes = (
         queryset.select_related("responsable")
-        .order_by("grado_matriculado", "seccion", "apellidos", "nombre")
+        .order_by("seccion__nivel_educativo", "seccion", "apellidos", "nombre")
         .values(
             "responsable__id",
             "responsable__apellidos",
@@ -290,8 +307,8 @@ def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion(
             "responsable__dui",
             "apellidos",
             "nombre",
-            "grado_matriculado__nivel",
             "seccion__seccion",
+            "seccion__nivel_educativo__nivel"
         )
     )
     wb = Workbook()
@@ -316,7 +333,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion(
                     f"{estudiante['responsable__apellidos']}, {estudiante['responsable__nombre']}",
                     estudiante["responsable__dui"],
                     f"{estudiante['apellidos']}, {estudiante['nombre']}",
-                    f"{estudiante['grado_matriculado__nivel']} - {estudiante['seccion__seccion']}",
+                    f"{estudiante['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}"
                 ]
             )
             for estudiante_b in estudiantes[count + 1 :]:
@@ -326,7 +343,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion(
                             f"{estudiante_b['responsable__apellidos']}, {estudiante_b['responsable__nombre']}",
                             estudiante_b["responsable__dui"],
                             f"{estudiante_b['apellidos']}, {estudiante_b['nombre']}",
-                            f"{estudiante_b['grado_matriculado__nivel']} - {estudiante_b['seccion__seccion']}",
+                            f"{estudiante_b['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}"
                         ]
                     )
             responsables_usados.append(estudiante["responsable__id"])
@@ -360,7 +377,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_seccion(self, request, query
     # para ello pasamos el query a values
     estudiantes = (
         queryset.select_related("responsable")
-        .order_by("grado_matriculado", "seccion", "apellidos", "nombre")
+        .order_by("seccion__nivel_educativo", "seccion", "apellidos", "nombre")
         .values(
             "responsable__id",
             "responsable__apellidos",
@@ -368,8 +385,8 @@ def exportar_a_excel_estudiantes_y_responsables_por_seccion(self, request, query
             "responsable__dui",
             "apellidos",
             "nombre",
-            "grado_matriculado__nivel",
             "seccion__seccion",
+            "seccion__nivel_educativo__nivel",
         )
     )
     wb = Workbook()
@@ -388,7 +405,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_seccion(self, request, query
                 f"{estudiante['responsable__apellidos']}, {estudiante['responsable__nombre']}",
                 estudiante["responsable__dui"],
                 f"{estudiante['apellidos']}, {estudiante['nombre']}",
-                f"{estudiante['grado_matriculado__nivel']} - {estudiante['seccion__seccion']}",
+                f"{estudiante['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}"
             ]
         )
 
@@ -409,6 +426,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_seccion(self, request, query
 
 def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, queryset):
     """
+    TODO: ESTA ACCIÓN NO FUNCIONA ACTUALMENTE
     Acción que toma un queryset de Estudiantes y exporta
     a excel las columnas: Responsable, DUI de responsable,
     estudiante y sección del estudiante, ordenados en primer
@@ -420,8 +438,8 @@ def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, querys
     """
 
     estudiantes = (
-        queryset.prefetch_related("grado_matriculado__nivel")
-        .order_by("grado_matriculado", "seccion", "apellidos", "nombre")
+        queryset.select_related("seccion__nivel_educativo")
+        .order_by("seccion__nivel_educativo", "seccion", "apellidos", "nombre")
         .values(
             "responsable__id",
             "responsable__apellidos",
@@ -429,9 +447,9 @@ def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, querys
             "responsable__dui",
             "apellidos",
             "nombre",
-            "grado_matriculado__nivel",
-            "seccion__id",
             "seccion__seccion",
+            "seccion__id",
+            "seccion__nivel_educativo__nivel",
         )
     )
 
@@ -458,7 +476,7 @@ def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, querys
         else:
             if estudiante["seccion__id"] != seccion_actual:
                 ws = wb.add_worksheet(
-                    f"{estudiante['grado_matriculado__nivel']} {estudiante['seccion__seccion']}".title()
+                    f"{estudiante['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}".title()
                     .replace("Años", "")
                     .replace("Año", "")
                     .replace("Bachillerato", "")
@@ -502,7 +520,7 @@ def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, querys
                     f"{estudiante['responsable__apellidos']}, {estudiante['responsable__nombre']}",
                     estudiante["responsable__dui"],
                     f"{estudiante['apellidos']}, {estudiante['nombre']}",
-                    f"{estudiante['grado_matriculado__nivel'].title()} {estudiante['seccion__seccion']}",
+                    f"{estudiante['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}",
                     "",
                 ],
                 list_body_format,
@@ -519,7 +537,7 @@ def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, querys
                             f"{estudiante_b['responsable__apellidos']}, {estudiante_b['responsable__nombre']}",
                             estudiante_b["responsable__dui"],
                             f"{estudiante_b['apellidos']}, {estudiante_b['nombre']}",
-                            f"{estudiante_b['grado_matriculado__nivel'].title()} {estudiante_b['seccion__seccion']}",
+                            f"{estudiante['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}",
                             "",
                         ],
                         list_body_format,
