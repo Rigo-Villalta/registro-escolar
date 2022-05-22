@@ -13,7 +13,7 @@ class Falta(models.Model):
     descripcion = models.TextField(verbose_name="descripción")
 
     def __str__(self):
-        return self.descripcion
+        return f"{self.codigo} {self.get_categoria_display()} {self.descripcion}"
 
 
 class FaltaDisciplinariaEstudiantil(models.Model):
