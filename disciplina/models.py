@@ -2,14 +2,13 @@ from django.db import models
 
 from personas.models import Estudiante
 
+
 class Falta(models.Model):
-    CATEGORIA_CHOICES = (
-        ('L', 'Leve'),
-        ('G', 'Grave'),
-        ('M', "Muy Grave")
-    )
+    CATEGORIA_CHOICES = (("L", "Leve"), ("G", "Grave"), ("M", "Muy Grave"))
     codigo = models.PositiveSmallIntegerField(verbose_name="código")
-    categoria = models.CharField(verbose_name="categoría", max_length=1, choices=CATEGORIA_CHOICES, default='L')
+    categoria = models.CharField(
+        verbose_name="categoría", max_length=1, choices=CATEGORIA_CHOICES, default="L"
+    )
     descripcion = models.TextField(verbose_name="descripción")
 
     def __str__(self):
@@ -27,4 +26,4 @@ class FaltaDisciplinariaEstudiantil(models.Model):
         verbose_name_plural = "faltas disciplinarias de estudiantes"
 
     def __str__(self):
-        return f'{self.falta.descripcion}, {self.fecha}'
+        return f"{self.falta.descripcion}, {self.fecha}"

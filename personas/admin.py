@@ -5,6 +5,7 @@ from django_admin_listfilter_dropdown.filters import (
     ChoiceDropdownFilter,
 )
 
+from disciplina.admin import FaltaDisciplinariaEstudiantilInline
 from escuela.admin import escuela_admin
 
 from .actions import (
@@ -13,7 +14,7 @@ from .actions import (
     exportar_todos_los_datos_a_excel,
     exportar_a_excel_datos_completos_de_responsables,
     exportar_a_excel_estudiantes_y_responsables_por_seccion,
-    exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion
+    exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
 )
 from .filters import SeccionFilter, NivelEducativoFilter, MatriculadoFilter
 from .models import (
@@ -96,7 +97,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         "retirado",
         MatriculadoFilter,
     )
-    inlines = [SeccionInline]
+    inlines = [FaltaDisciplinariaEstudiantilInline, SeccionInline]
     search_fields = ["nombre", "apellidos"]
     autocomplete_fields = [
         "municipio_de_residencia",
@@ -221,7 +222,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         exportar_datos_de_contacto_a_excel,
         exportar_todos_los_datos_a_excel,
         exportar_a_excel_estudiantes_y_responsables_por_seccion,
-        exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion
+        exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
     ]
 
     class Media:
@@ -272,7 +273,11 @@ class MunicipioAdmin(admin.ModelAdmin):
             super()
             .get_queryset(request)
             .prefetch_related("departamento")
-            .annotate(_estudiantes_residentes=Count("reside_en", filter=Q(reside_en__seccion__isnull=False)))
+            .annotate(
+                _estudiantes_residentes=Count(
+                    "reside_en", filter=Q(reside_en__seccion__isnull=False)
+                )
+            )
             .order_by("-_estudiantes_residentes")
         )
 

@@ -4,18 +4,31 @@ from escuela.admin import escuela_admin
 
 from .models import Falta, FaltaDisciplinariaEstudiantil
 
+
 class FaltaAdmin(admin.ModelAdmin):
-    list_display = ['codigo', "categoria", "descripcion"]
+    list_display = ["codigo", "categoria", "descripcion"]
 
 
 class FaltaDisciplinariaEstudiantilAdmin(admin.ModelAdmin):
     list_display = ["estudiante", "__str__"]
-    autocomplete_fields = ['estudiante']
+    autocomplete_fields = ["estudiante"]
     search_fields = ["estudiante__nombre", "estudiante__apellidos"]
+
+
+class FaltaDisciplinariaEstudiantilInline(admin.TabularInline):
+    model = FaltaDisciplinariaEstudiantil
+    fields = ["falta", "fecha"]
+    readonly_fields = ["falta", "fecha"]
+    extra = 0
+
+    def has_add_permission(self, request, obj):
+        return False
 
 
 admin.site.register(Falta, FaltaAdmin)
 admin.site.register(FaltaDisciplinariaEstudiantil, FaltaDisciplinariaEstudiantilAdmin)
 
 escuela_admin.register(Falta, FaltaAdmin)
-escuela_admin.register(FaltaDisciplinariaEstudiantil, FaltaDisciplinariaEstudiantilAdmin)
+escuela_admin.register(
+    FaltaDisciplinariaEstudiantil, FaltaDisciplinariaEstudiantilAdmin
+)
