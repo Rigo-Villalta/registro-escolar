@@ -11,7 +11,7 @@ class FaltaAdmin(admin.ModelAdmin):
 
 
 class FaltaDisciplinariaEstudiantilAdmin(admin.ModelAdmin):
-    list_display = ["estudiante", "__str__"]
+    list_display = ["estudiante", "fecha", "descripcion"]
     autocomplete_fields = ["estudiante"]
     search_fields = ["estudiante__nombre", "estudiante__apellidos"]
 

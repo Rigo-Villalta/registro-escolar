@@ -12,7 +12,7 @@ class Falta(models.Model):
     descripcion = models.TextField(verbose_name="descripción")
 
     def __str__(self):
-        return f"{self.codigo} {self.get_categoria_display()} {self.descripcion}"
+        return f"{self.codigo} {self.get_categoria_display()} {self.descripcion[:50]}..."
 
 
 class FaltaDisciplinariaEstudiantil(models.Model):
@@ -26,4 +26,4 @@ class FaltaDisciplinariaEstudiantil(models.Model):
         verbose_name_plural = "faltas disciplinarias de estudiantes"
 
     def __str__(self):
-        return f"{self.falta.descripcion}, {self.fecha}"
+        return f"{self.falta.descripcion[:50]}..., {self.fecha}"
