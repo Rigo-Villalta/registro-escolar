@@ -1,11 +1,14 @@
 from django.contrib import admin
 from django.db.models.aggregates import Count
 from django.db.models.query_utils import Q
+from django.template.response import TemplateResponse
+from django.urls import path
 from django_admin_listfilter_dropdown.filters import (
     ChoiceDropdownFilter,
 )
 
 from disciplina.admin import FaltaDisciplinariaEstudiantilInline
+from disciplina.models import FaltaDisciplinariaEstudiantil
 from escuela.admin import escuela_admin
 
 from .actions import (
@@ -246,6 +249,36 @@ class EstudianteAdmin(admin.ModelAdmin):
             .get_queryset(request)
             .select_related("seccion__nivel_educativo")
             .filter(retirado=False)
+        )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            path(
+                "historial_disciplinario_del_estudiante/<int:pk>/",
+                self.admin_site.admin_view(self.historial_disciplinario_del_estudiante),
+                name="historial_disciplinario_del_estudiante"
+            ),
+        ]
+        return my_urls + urls
+
+    def historial_disciplinario_del_estudiante(self, request, pk):
+        """
+        Vista dentro de Django admin que retorna todo el historial
+        de faltas disciplinarias de un estudiante
+        """
+        estudiante = Estudiante.objects.get(pk=pk)
+        historial_disciplinario_del_estudiante = (
+            FaltaDisciplinariaEstudiantil.objects.filter(estudiante=estudiante)
+        )
+        context = dict(
+            # Include common variables for rendering the admin template.
+            self.admin_site.each_context(request),
+            estudiante=estudiante,
+            historial_disciplinario_del_estudiante=historial_disciplinario_del_estudiante,
+        )
+        return TemplateResponse(
+            request, "disciplina/historial_disciplinario_del_estudiante.html", context
         )
 
 

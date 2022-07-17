@@ -15,6 +15,11 @@ class FaltaDisciplinariaEstudiantilAdmin(admin.ModelAdmin):
     autocomplete_fields = ["estudiante"]
     search_fields = ["estudiante__nombre", "estudiante__apellidos"]
 
+    def has_change_permission(self, request, obj=None):
+        if obj:
+            return obj.periodo_escolar.periodo_activo
+        return super().has_change_permission(request, obj)
+
 
 class FaltaDisciplinariaEstudiantilInline(admin.TabularInline):
     model = FaltaDisciplinariaEstudiantil

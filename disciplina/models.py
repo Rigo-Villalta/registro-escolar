@@ -1,4 +1,5 @@
 from django.db import models
+from escuela.models import PeriodoEscolar
 
 from personas.models import Estudiante
 
@@ -20,6 +21,7 @@ class FaltaDisciplinariaEstudiantil(models.Model):
     falta = models.ForeignKey(Falta, on_delete=models.CASCADE)
     fecha = models.DateField(help_text="Fecha en que se cometió la falta")
     descripcion = models.TextField(verbose_name="Descripción")
+    periodo_escolar = models.ForeignKey(to=PeriodoEscolar, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name = "falta disciplinaria de estudiante"
@@ -27,3 +29,6 @@ class FaltaDisciplinariaEstudiantil(models.Model):
 
     def __str__(self):
         return f"{self.falta.descripcion[:50]}..., {self.fecha}"
+    
+    def clean(self) -> None:
+        self.periodo_escolar = PeriodoEscolar.objects.get(periodo_activo=True)
