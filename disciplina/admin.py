@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 
 from escuela.models import PeriodoEscolar
 from escuela.admin import escuela_admin
@@ -23,8 +25,8 @@ class FaltaDisciplinariaEstudiantilAdmin(admin.ModelAdmin):
 
 class FaltaDisciplinariaEstudiantilInline(admin.TabularInline):
     model = FaltaDisciplinariaEstudiantil
-    fields = ["falta", "fecha"]
-    readonly_fields = ["falta", "fecha"]
+    fields = ["ver", "falta", "descripcion", "fecha"]
+    readonly_fields = ["ver", "falta", "descripcion", "fecha"]
     extra = 0
     show_change_link = True
     verbose_name_plural = "Faltas disciplinarias cometidas por el estudiante"
@@ -43,6 +45,18 @@ class FaltaDisciplinariaEstudiantilInline(admin.TabularInline):
             .get_queryset(request)
             .filter(fecha__gt=periodo_escolar_activo.fecha_de_inicio)
         )
+    
+    def ver(self, instance):
+        """
+        Agregamos un campo que enlaza a el Admin Change View
+        de el objeto.
+        """
+        url = reverse(
+            "escuela_admin:%s_%s_change"
+            % (instance._meta.app_label, instance._meta.model_name),
+            args=(instance.pk,),
+        )
+        return format_html('<a class="viewlink" href="{}">Ver</a>', url)
 
 
 admin.site.register(Falta, FaltaAdmin)

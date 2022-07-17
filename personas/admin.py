@@ -69,6 +69,7 @@ class SeccionInline(admin.TabularInline):
     fields = ["seccion", "periodo_escolar"]
     readonly_fields = ["periodo_escolar"]
     verbose_name_plural = "Historial de secciones"
+    template = "admin/edit_inline/custom_tabular.html"
 
     def has_change_permission(self, requestt, obj):
         return False
