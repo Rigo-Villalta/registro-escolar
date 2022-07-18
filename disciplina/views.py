@@ -15,7 +15,7 @@ def exportar_faltas_disciplinarias_de_periodo_escolar_activo(request):
     seccion y luego por estudiante, si un estudiante tiene varias faltas
     deben salir consecutivamente por fecha.
     """
-    if request.user.es_administrador:
+    if request.user.es_administrador():
         periodo_escolar_activo = PeriodoEscolar.objects.get(periodo_activo=True)
         faltas_de_periodo_escolar_activo = (
             FaltaDisciplinariaEstudiantil.objects.filter(

@@ -41,7 +41,13 @@
   <div id="content-main">
     {% block object-tools %}
         <ul class="object-tools">
-          <li><a href="{% url "disciplina:exportar_faltas_disciplinarias_de_periodo_escolar_activo" %}">Excel de Faltas</a></li>
+          {% if user.es_administrador %}
+          <li>
+            <a href="{% url "disciplina:exportar_faltas_disciplinarias_de_periodo_escolar_activo" %}">
+              Excel de Faltas
+            </a>
+          </li>
+          {% endif %}
           {% block object-tools-items %}
             {% change_list_object_tools %}
           {% endblock %}
