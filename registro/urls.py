@@ -17,7 +17,12 @@ from escuela.admin import escuela_admin
 
 urlpatterns = [
     path(
-        "restauracion_solicitada",
+        "disciplina/",
+        include("disciplina.urls"),
+        name="disciplina"
+    ),
+    path(
+        "restauracion_solicitada/",
         PasswordResetDoneView.as_view(),
         name="password_reset_done",
     ),
