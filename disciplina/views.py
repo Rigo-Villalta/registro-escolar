@@ -71,7 +71,7 @@ def exportar_faltas_disciplinarias_de_periodo_escolar_activo(request):
             )
             response[
                 "Content-Disposition"
-            ] = f'attachment; filename=Cantidad_de_estudiantes_por_secciones-{datetime.date.today().strftime("%Y_%m_%d")}.xlsx'
+            ] = f'attachment; filename=Faltas disciplinarias de estudiantes-{datetime.date.today().strftime("%Y_%m_%d")}.xlsx'
         return response
     else:
         raise PermissionDenied
