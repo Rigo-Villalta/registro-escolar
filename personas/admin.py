@@ -101,7 +101,6 @@ class EstudianteAdmin(admin.ModelAdmin):
         "retirado",
         MatriculadoFilter,
     )
-    inlines = [FaltaDisciplinariaEstudiantilInline, SeccionInline]
     search_fields = ["nombre", "apellidos"]
     autocomplete_fields = [
         "municipio_de_residencia",
@@ -238,6 +237,12 @@ class EstudianteAdmin(admin.ModelAdmin):
             del actions["delete_selected"]
         return actions
 
+    def get_inlines(self, request, obj=None):
+        if obj:
+            return [FaltaDisciplinariaEstudiantilInline, SeccionInline]
+        else:
+            return super().get_inlines(request, obj)
+
     def get_queryset(self, request):
         search = request.GET.get("retirado__exact")
         change = request.GET.get("_changelist_filters")
@@ -258,7 +263,7 @@ class EstudianteAdmin(admin.ModelAdmin):
             path(
                 "historial_disciplinario_del_estudiante/<int:pk>/",
                 self.admin_site.admin_view(self.historial_disciplinario_del_estudiante),
-                name="historial_disciplinario_del_estudiante"
+                name="historial_disciplinario_del_estudiante",
             ),
         ]
         return my_urls + urls
