@@ -32,3 +32,5 @@ def agregar_usuario_a_grupo(sender, instance, created, **kwargs):
             instance.groups.add(digitadores)
         except:
             pass
+    instance.is_staff = True
+    instance.save()
