@@ -95,7 +95,23 @@ class Seccion(models.Model):
         PeriodoEscolar, verbose_name="período escolar", on_delete=models.CASCADE
     )
     nivel_educativo = models.ForeignKey(NivelEducativo, on_delete=models.CASCADE)
-    SECCION_CHOICES = (("A", "A"), ("B", "B"), ("C", "C"), ("D", "D"), ("E", "E"))
+    SECCION_CHOICES = (
+        ("A", "A"),
+        ("B", "B"),
+        ("C", "C"),
+        ("D", "D"),
+        ("E", "E"),
+        ("F", "F"),
+        ("G", "G"),
+        ("H", "H"),
+        ("I", "I"),
+        ("J", "J"),
+        ("K", "K"),
+        ("F", "F"),
+        ("L", "L"),
+        ("M", "M"),
+        ("N", "N"),
+    )
     seccion = models.CharField(
         verbose_name="sección", max_length=1, choices=SECCION_CHOICES, default="A"
     )
@@ -115,4 +131,8 @@ class Seccion(models.Model):
     class Meta:
         verbose_name = "sección"
         verbose_name_plural = "secciones"
-        ordering = ["nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion"]
+        ordering = [
+            "nivel_educativo__edad_normal_de_ingreso",
+            "nivel_educativo",
+            "seccion",
+        ]
