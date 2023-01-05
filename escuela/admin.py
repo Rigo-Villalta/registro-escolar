@@ -193,7 +193,24 @@ class SeccionAdmin(admin.ModelAdmin):
                     seccion_mayor = estudiante.secciones.filter(
                         periodo_escolar__periodo_activo=False
                     ).order_by("-nivel_educativo__edad_normal_de_ingreso")[0]
-                    if 7 < seccion_mayor.nivel_educativo.edad_normal_de_ingreso < 12:
+                    if seccion_mayor.nivel_educativo.nivel == "EDUCACIÓN ACELERADA":
+                        queryset = (
+                            Seccion.objects.select_related(
+                                "nivel_educativo", "periodo_escolar"
+                            )
+                            .filter(
+                                Q(periodo_escolar__periodo_activo=True),
+                                Q(nivel_educativo__edad_normal_de_ingreso=11)
+                                | Q(nivel_educativo__edad_normal_de_ingreso=12)
+                                | Q(nivel_educativo__edad_normal_de_ingreso=13)
+                            )
+                            .order_by(
+                                "nivel_educativo__edad_normal_de_ingreso",
+                                "nivel_educativo",
+                                "seccion",
+                            )
+                        )
+                    elif 7 < seccion_mayor.nivel_educativo.edad_normal_de_ingreso < 12:
                         queryset = (
                             Seccion.objects.select_related(
                                 "nivel_educativo", "periodo_escolar"
