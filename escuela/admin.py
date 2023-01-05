@@ -185,8 +185,11 @@ class SeccionAdmin(admin.ModelAdmin):
             request, queryset, search_term
         )
         url_referida = request.META.get("HTTP_REFERER").rstrip("/").split("/")
+        # este if es necesario  para evitar que al estar en la ChangeView de un
+        # Estudiantes, el queryset no contenga los atributos "Annotate" que se han
+        # pueste en get_queryset.
         try:
-            if url_referida[5] == "estudiante" and url_referida[7] == "change":
+            if "autocomplete" in request.path and url_referida[5] == "estudiante" and url_referida[7] == "change":
                 try:
                     id_estudiante = url_referida[6]
                     estudiante = Estudiante.objects.get(pk=id_estudiante)
