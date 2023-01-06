@@ -240,7 +240,7 @@ class SeccionAdmin(admin.ModelAdmin):
                             )
                             .filter(
                                 Q(periodo_escolar__periodo_activo=True),
-                                Q(nivel_educativo=seccion_mayor.nivel_educativo)
+                                Q(nivel_educativo__edad_normal_de_ingreso=seccion_mayor.nivel_educativo.edad_normal_de_ingreso)
                                 | Q(
                                     nivel_educativo__edad_normal_de_ingreso=seccion_mayor.nivel_educativo.edad_normal_de_ingreso
                                     + 1
