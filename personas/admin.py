@@ -87,7 +87,7 @@ class SeccionInline(admin.TabularInline):
 
 
 class EstudianteAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "seccion", "edad", "sobreedad", "sexo"]
+    list_display = ["__str__", "seccion", "edad", "sobreedad", "sexo", "retirado"]
     ordering = [
         "seccion__nivel_educativo__edad_normal_de_ingreso",
         "seccion",
