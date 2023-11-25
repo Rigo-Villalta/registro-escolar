@@ -1,3 +1,5 @@
+from unidecode import unidecode
+
 from django.contrib import admin
 from django.db.models.aggregates import Count
 from django.db.models.query_utils import Q
@@ -227,6 +229,18 @@ class EstudianteAdmin(admin.ModelAdmin):
         exportar_a_excel_estudiantes_y_responsables_por_seccion,
         exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
     ]
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, may_have_duplicates = super().get_search_results(
+            request,
+            queryset,
+            search_term,
+        )
+        queryset |= self.model.objects.filter(
+            Q(apellidos__icontains=unidecode(search_term))
+            | Q(nombre__icontains=unidecode(search_term))
+        )
+        return queryset, may_have_duplicates
 
     class Media:
         js = ("hidePlus.js",)
