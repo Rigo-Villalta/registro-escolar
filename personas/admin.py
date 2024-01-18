@@ -231,15 +231,18 @@ class EstudianteAdmin(admin.ModelAdmin):
     ]
 
     def get_search_results(self, request, queryset, search_term):
+        original_queryset = queryset
         queryset, may_have_duplicates = super().get_search_results(
             request,
             queryset,
             search_term,
         )
-        queryset |= self.model.objects.filter(
-            Q(apellidos__icontains=unidecode(search_term))
-            | Q(nombre__icontains=unidecode(search_term))
-        )
+        if search_term:
+            queryset |= self.model.objects.filter(
+                Q(apellidos__icontains=unidecode(search_term))
+                | Q(nombre__icontains=unidecode(search_term))
+            )
+        queryset = queryset & original_queryset
         return queryset, may_have_duplicates
 
     class Media:
