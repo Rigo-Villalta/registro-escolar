@@ -81,7 +81,7 @@ class EstudianteInline(admin.TabularInline):
         return False
 
     def has_delete_permission(self, request, obj):
-        return False
+        return obj.periodo_escolar.periodo_activo
 
     def has_add_permission(self, request, obj):
         return False
