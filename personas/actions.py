@@ -343,7 +343,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion(
                             f"{estudiante_b['responsable__apellidos']}, {estudiante_b['responsable__nombre']}",
                             estudiante_b["responsable__dui"],
                             f"{estudiante_b['apellidos']}, {estudiante_b['nombre']}",
-                            f"{estudiante_b['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}"
+                            f"{estudiante_b['seccion__nivel_educativo__nivel']} {estudiante_b['seccion__seccion']}"
                         ]
                     )
             responsables_usados.append(estudiante["responsable__id"])
