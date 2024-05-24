@@ -556,3 +556,101 @@ def exportar_a_excel_lista_de_firmas_por_seccion_y_familia(self, request, querys
     )
     response["Content-Disposition"] = "attachment; filename=%s" % filename
     return response
+
+
+
+def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion_separadas(
+    self, request, queryset
+):
+    """
+    Acción que toma un queryset de Estudiantes y exporta
+    a excel las columnas: Responsable, DUI de responsable,
+    estudiante y sección del estudiante, ordenados en primer
+    lugar por sección, pero con familias en conjunto, es decir
+    el primer niño de kinder 3 es el primero, si tiene hermanos
+    luego ellos, luego el segundo niño de kinder 3 y sus hermanos y así
+    sucesivamente, estos hermanos ya no aparecen en su repectiva seccion
+    haciemos uso de la librería openpyxl ver: openpyxl.readthedocs.io
+    """
+
+    # optimización del queryset para los datos
+    # de responsable relacionados y ordenados
+    # para ello pasamos el query a values
+    estudiantes = (
+        queryset.select_related("responsable")
+        .order_by("seccion__nivel_educativo", "seccion", "apellidos", "nombre")
+        .values(
+            "responsable__id",
+            "responsable__apellidos",
+            "responsable__nombre",
+            "responsable__dui",
+            "apellidos",
+            "nombre",
+            "seccion__seccion",
+            "seccion__nivel_educativo__nivel"
+        )
+    )
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Responsables - Estudiantes"
+    ws.column_dimensions["A"].width = 5
+    ws.column_dimensions["B"].width = 35
+    ws.column_dimensions["C"].width = 12
+    ws.column_dimensions["D"].width = 35
+    ws.column_dimensions["E"].width = 45
+
+    # el algoritmo para encontrar otros estudiantes del mismo
+    # responsable se hace a nivel de Python y no ORM
+    responsables_usados = []
+    count = 0
+    seccion = []
+    contador_seccion = 1
+    for estudiante in estudiantes:
+        if seccion != [estudiante['seccion__nivel_educativo__nivel'], estudiante['seccion__seccion']]:
+            ws.append([""])
+            ws.append([""])
+            ws.append(["", estudiante['seccion__nivel_educativo__nivel'], estudiante['seccion__seccion']])
+            ws.append([""])
+            ws.append(["#", "Responsable", "DUI de responsable", "Estudiante", "Sección"])
+            seccion = [estudiante['seccion__nivel_educativo__nivel'], estudiante['seccion__seccion']]
+            contador_seccion = 1
+        if estudiante["responsable__id"] in responsables_usados:
+            count += 1
+        else:
+            ws.append(
+                [
+                    f"{contador_seccion}",
+                    f"{estudiante['responsable__apellidos']}, {estudiante['responsable__nombre']}",
+                    estudiante["responsable__dui"],
+                    f"{estudiante['apellidos']}, {estudiante['nombre']}",
+                    f"{estudiante['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}"
+                ]
+            )
+            contador_seccion += 1
+            for estudiante_b in estudiantes[count + 1 :]:
+                if estudiante["responsable__id"] == estudiante_b["responsable__id"]:
+                    ws.append(
+                        [
+                            "",
+                            f"{estudiante_b['responsable__apellidos']}, {estudiante_b['responsable__nombre']}",
+                            estudiante_b["responsable__dui"],
+                            f"{estudiante_b['apellidos']}, {estudiante_b['nombre']}",
+                            f"{estudiante_b['seccion__nivel_educativo__nivel']} {estudiante_b['seccion__seccion']}"
+                        ]
+                    )
+            responsables_usados.append(estudiante["responsable__id"])
+            count += 1
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+
+        response = HttpResponse(
+            content=stream,
+            content_type="application/ms-excel",
+        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename=ListaDeEstudiantesYResponsables-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
+        return response
