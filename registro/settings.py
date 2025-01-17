@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     "disciplina.apps.DisciplinaConfig",
     "escuela.apps.EscuelaConfig",
     "personas.apps.PersonasConfig",
+    "asistencia.apps.AsistenciaConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

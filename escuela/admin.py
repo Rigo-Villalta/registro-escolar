@@ -33,7 +33,7 @@ class EscuelaAdmin(admin.AdminSite):
         modelos que se registran en el SchoolAdmin o se obtendrá
         un error de ejecución al correr el sitio.
         """
-        ordering_apps = {"usuarios": 1, "personas": 2, "escuela": 3, "disciplina": 4}
+        ordering_apps = {"usuarios": 1, "personas": 2, "escuela": 3, "disciplina": 4, "asistencia": 5}
         # En ordering_models es importante usar capfirst para que iguale
         # el diccionario creado por el método _build_app_dict
         ordering_models = {
@@ -51,6 +51,8 @@ class EscuelaAdmin(admin.AdminSite):
             # Disciplina
             capfirst("faltas"): 1,
             capfirst("Faltas disciplinarias de estudiantes"): 2,
+            #asistencia
+            capfirst("asistencias de secciones"): 1,
         }
         app_dict = self._build_app_dict(request)
         # Se sobreescribe el orden de las apps
