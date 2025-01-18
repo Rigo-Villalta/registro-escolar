@@ -68,7 +68,7 @@ class ResponsableAdmin(admin.ModelAdmin):
 
 
 class SeccionInline(admin.TabularInline):
-    model = Estudiante.secciones.through
+    model = Estudiante.secciones.through    
     fields = ["seccion", "periodo_escolar"]
     readonly_fields = ["periodo_escolar"]
     verbose_name_plural = "Historial de secciones"
@@ -136,6 +136,8 @@ class EstudianteAdmin(admin.ModelAdmin):
                 "fields": [
                     "telefono_1",
                     "telefono_2",
+                    "telefono_de_responsable_1",
+                    "telefono_de_responsable_2",
                     "correo_electronico",
                     "municipio_de_residencia",
                     "direccion_de_residencia",
@@ -232,6 +234,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
         exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion_separadas
     ]
+    readonly_fields = ["telefono_de_responsable_1", "telefono_de_responsable_2"]
 
     def get_search_results(self, request, queryset, search_term):
         original_queryset = queryset
@@ -306,6 +309,19 @@ class EstudianteAdmin(admin.ModelAdmin):
         return TemplateResponse(
             request, "disciplina/historial_disciplinario_del_estudiante.html", context
         )
+    
+    def telefono_de_responsable_1(self, obj):
+        if obj.responsable.telefono_1 is None:
+            return "--"
+        return obj.responsable.telefono_1
+    
+    def telefono_de_responsable_2(self, obj):
+        if obj.responsable.telefono_2 is None:
+            return "--"
+        return obj.responsable.telefono_2
+    
+    telefono_de_responsable_1.short_description = "Teléfono de responsable 1"
+    telefono_de_responsable_2.short_description = "Teléfono de responsable 2"
 
 
 exportar_datos_basicos_a_excel.short_description = "Exportar datos básicos a excel"
