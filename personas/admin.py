@@ -105,7 +105,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         "retirado",
         MatriculadoFilter,
     )
-    search_fields = ["nombre", "apellidos"]
+    search_fields = ["nombre", "apellidos", "nie"]
     autocomplete_fields = [
         "municipio_de_residencia",
         "municipio_de_nacimiento",
