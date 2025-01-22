@@ -121,6 +121,7 @@ class EstudianteAdmin(admin.ModelAdmin):
                 "fields": [
                     "nombre",
                     "apellidos",
+                    "nie",
                     "sexo",
                     "posee_partida",
                     "fecha_de_nacimiento",
@@ -146,7 +147,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         ),
         (
             "Información escolar",
-            {"fields": ["nie", "escuela_previa", "seccion"]},
+            {"fields": ["escuela_previa", "seccion"]},
         ),
         (
             "Información complementaria",
