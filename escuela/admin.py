@@ -151,8 +151,10 @@ class SeccionAdmin(admin.ModelAdmin):
         "periodo_escolar",
         "femenino",
         "masculino",
-        "total_retirados",
-        "total_estudiantes",
+        "activos",
+        "retirados",
+        "retirados_femenino",
+        "retirados_masculino"
     )
     search_fields = ["nivel_educativo__nivel"]
     list_filter = [SeccionPorPeriodoFilter]
@@ -167,10 +169,12 @@ class SeccionAdmin(admin.ModelAdmin):
             Seccion.objects.select_related("periodo_escolar", "nivel_educativo")
             .prefetch_related(Prefetch("estudiantes"))
             .annotate(
-                _total_estudiantes=Count("estudiantes", distinct=True),
-                _total_femenino=Count("estudiantes", filter=Q(estudiantes__sexo="F")),
-                _total_masculino=Count("estudiantes", filter=Q(estudiantes__sexo="M")),
-                _total_retirados=Count("estudiantes", filter=Q(estudiantes__retirado=True)),
+                _activos=Count("estudiantes", filter=Q(estudiantes__retirado=False)),
+                _femenino=Count("estudiantes", filter=Q(estudiantes__sexo="F")),
+                _masculino=Count("estudiantes", filter=Q(estudiantes__sexo="M")),
+                _retirados_masculino=Count("estudiantes", filter=Q(estudiantes__retirado=True, estudiantes__sexo="M")),
+                _retirados_femenino=Count("estudiantes", filter=Q(estudiantes__retirado=True, estudiantes__sexo="F")),
+                _retirados=Count("estudiantes", filter=Q(estudiantes__retirado=True))
             )
         ).order_by(
             "nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion"
@@ -262,17 +266,23 @@ class SeccionAdmin(admin.ModelAdmin):
             pass
         return queryset, use_distinct
 
-    def total_estudiantes(self, obj):
-        return obj._total_estudiantes
+    def activos(self, obj):
+        return obj._activos
 
     def femenino(self, obj):
-        return obj._total_femenino
+        return obj._femenino
 
     def masculino(self, obj):
-        return obj._total_masculino
+        return obj._masculino
     
-    def total_retirados(self, obj):
-        return obj._total_retirados
+    def retirados(self, obj):
+        return obj._retirados
+    
+    def retirados_masculino(self, obj):
+        return obj._retirados_masculino
+    
+    def retirados_femenino(self, obj):
+        return obj._retirados_femenino
 
 
 admin.site.register(Escuela, EscuelaAdmin)
