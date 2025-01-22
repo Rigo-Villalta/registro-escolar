@@ -274,15 +274,14 @@ class EstudianteAdmin(admin.ModelAdmin):
             return (
                 super().get_queryset(request).select_related("seccion__nivel_educativo")
             )
-        # si es la vista de detalle de un estudiante se puede ver cualquier estudiante
-        if request.resolver_match.url_name == "personas_estudiante_change":
-            return super().get_queryset(request)
-        return (
+        if request.resolver_match.url_name == "personas_estudiante_changelist":
+            return (
             super()
             .get_queryset(request)
             .select_related("seccion__nivel_educativo")
             .filter(retirado=False)
         )
+        return super().get_queryset(request).select_related("seccion__nivel_educativo")
 
     def get_urls(self):
         urls = super().get_urls()
