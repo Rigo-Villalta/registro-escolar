@@ -151,6 +151,7 @@ class SeccionAdmin(admin.ModelAdmin):
         "periodo_escolar",
         "femenino",
         "masculino",
+        "total_retirados",
         "total_estudiantes",
     )
     search_fields = ["nivel_educativo__nivel"]
@@ -169,6 +170,7 @@ class SeccionAdmin(admin.ModelAdmin):
                 _total_estudiantes=Count("estudiantes", distinct=True),
                 _total_femenino=Count("estudiantes", filter=Q(estudiantes__sexo="F")),
                 _total_masculino=Count("estudiantes", filter=Q(estudiantes__sexo="M")),
+                _total_retirados=Count("estudiantes", filter=Q(estudiantes__retirado=True)),
             )
         ).order_by(
             "nivel_educativo__edad_normal_de_ingreso", "nivel_educativo", "seccion"
@@ -268,6 +270,9 @@ class SeccionAdmin(admin.ModelAdmin):
 
     def masculino(self, obj):
         return obj._total_masculino
+    
+    def total_retirados(self, obj):
+        return obj._total_retirados
 
 
 admin.site.register(Escuela, EscuelaAdmin)
