@@ -71,13 +71,13 @@ escuela_admin = EscuelaAdmin(name="escuela_admin")
 
 
 class EstudianteInline(admin.TabularInline):
-    model = Estudiante.secciones.through
+    model = Estudiante
     fk_name = "seccion"
-    fields = ["estudiante"]
+    fields = ["apellidos", "nombre", "retirado"]
     extra = 0
     verbose_name_plural = "Estudiantes en la sección"
     show_change_link = True
-    ordering = ["estudiante__apellidos", "estudiante__nombre"]
+    ordering = ["apellidos", "nombre"]
 
     def has_change_permission(self, request, obj):
         return False
