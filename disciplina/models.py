@@ -22,6 +22,7 @@ class FaltaDisciplinariaEstudiantil(models.Model):
     fecha = models.DateField(help_text="Fecha en que se cometió la falta")
     descripcion = models.TextField(verbose_name="Descripción")
     periodo_escolar = models.ForeignKey(to=PeriodoEscolar, on_delete=models.PROTECT)
+    docente_que_reporta = models.CharField(max_length=10, verbose_name="Docente que reporta", default="--")
 
     class Meta:
         verbose_name = "falta disciplinaria de estudiante"
