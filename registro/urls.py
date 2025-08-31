@@ -1,4 +1,3 @@
-
 from debug_toolbar import urls
 from django.conf import settings
 from django.conf.urls.static import static
@@ -16,11 +15,7 @@ from escuela.admin import escuela_admin
 
 
 urlpatterns = [
-    path(
-        "disciplina/",
-        include("disciplina.urls"),
-        name="disciplina"
-    ),
+    path("disciplina/", include("disciplina.urls"), name="disciplina"),
     path(
         "restauracion_solicitada/",
         PasswordResetDoneView.as_view(),
@@ -47,3 +42,7 @@ urlpatterns = [
     path("chaining/", include("smart_selects.urls")),
     path("__debug__/", include(urls)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+escuela_admin.site_title = "CEDHRA - Registro Estudiantil"
+escuela_admin.site_header = "CEDHRA - Registro Estudiantil"
+escuela_admin.index_title = "Sistema administrativo institucional CEDHRA"
