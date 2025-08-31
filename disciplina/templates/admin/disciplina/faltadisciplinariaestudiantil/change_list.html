@@ -41,7 +41,7 @@
   <div id="content-main">
     {% block object-tools %}
         <ul class="object-tools">
-          {% if user.es_administrador %}
+          {% if perms.disciplina.can_change_faltadisciplinaria %}
           <li>
             <a href="{% url "disciplina:exportar_faltas_disciplinarias_de_periodo_escolar_activo" %}">
               Excel de Faltas
