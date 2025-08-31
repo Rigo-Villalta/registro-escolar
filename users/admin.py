@@ -1,9 +1,9 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin, GroupAdmin as BaseGroupAdmin
 from django.utils.translation import gettext_lazy as _
 
 from escuela.admin import escuela_admin
-from .models import User
+from .models import User, Grupo
 
 
 class CustomUserAdmin(UserAdmin):
@@ -26,4 +26,5 @@ class CustomUserAdmin(UserAdmin):
 
 
 escuela_admin.register(User, CustomUserAdmin)
+escuela_admin.register(Grupo, BaseGroupAdmin)
 admin.site.register(User, CustomUserAdmin)

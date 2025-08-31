@@ -39,6 +39,7 @@ class EscuelaAdmin(admin.AdminSite):
         ordering_models = {
             # Users
             capfirst("usuarios"): 1,
+            capfirst("grupos de usuarios"): 2,
             # Personas
             capfirst("estudiantes"): 1,
             capfirst("responsables"): 2,
