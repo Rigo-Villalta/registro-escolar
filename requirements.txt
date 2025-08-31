@@ -1,7 +1,7 @@
 black
 Django==5.2.5
 django-admin-list-filter-dropdown
-django-debug-toolbar
+django-debug-toolbar==4.4.6
 django-smart-selects==1.7.2
 gunicorn
 openpyxl
