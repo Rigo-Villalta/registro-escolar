@@ -6,6 +6,3 @@ class UsersConfig(AppConfig):
     name = "users"
     verbose_name = "usuarios"
     verbose_name_plural = "usuarios"
-
-    def ready(self):
-        import users.signals
