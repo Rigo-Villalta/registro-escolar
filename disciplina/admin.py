@@ -59,6 +59,10 @@ class FaltaDisciplinariaEstudiantilInline(admin.TabularInline):
         return format_html('<a class="viewlink" href="{}">Ver</a>', url)
 
 
+class DemeritoDeEstudianteAdmin(admin.ModelAdmin):
+    model = DemeritoDeEstudiante
+    autocomplete_fields = ["estudiante"]
+
 admin.site.register(Falta, FaltaAdmin)
 admin.site.register(FaltaDisciplinariaEstudiantil, FaltaDisciplinariaEstudiantilAdmin)
 
@@ -67,4 +71,4 @@ escuela_admin.register(
     FaltaDisciplinariaEstudiantil, FaltaDisciplinariaEstudiantilAdmin
 )
 escuela_admin.register(Demerito)
-escuela_admin.register(DemeritoDeEstudiante)
+escuela_admin.register(DemeritoDeEstudiante, DemeritoDeEstudianteAdmin)
