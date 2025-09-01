@@ -13,7 +13,9 @@ class Falta(models.Model):
     descripcion = models.TextField(verbose_name="descripción")
 
     def __str__(self):
-        return f"{self.codigo} {self.get_categoria_display()} {self.descripcion[:50]}..."
+        return (
+            f"{self.codigo} {self.get_categoria_display()} {self.descripcion[:50]}..."
+        )
 
 
 class FaltaDisciplinariaEstudiantil(models.Model):
@@ -44,6 +46,7 @@ class Demerito(models.Model):
     class Meta:
         verbose_name = "demérito"
         verbose_name_plural = "deméritos"
+        ordering = ["codigo"]
 
     def __str__(self):
         return f"{self.codigo} - {self.descripcion}"
