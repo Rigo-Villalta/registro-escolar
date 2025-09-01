@@ -67,4 +67,4 @@ class DemeritoDeEstudiante(models.Model):
         verbose_name_plural = "deméritos de estudiantes"
 
     def __str__(self):
-        return f"{self.falta.descripcion[:50]}..., {self.fecha}"
+        return f"{self.demerito.descripcion[:50]}..., {self.fecha}"
