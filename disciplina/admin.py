@@ -5,7 +5,7 @@ from django.utils.html import format_html
 from escuela.models import PeriodoEscolar
 from escuela.admin import escuela_admin
 
-from .models import Falta, FaltaDisciplinariaEstudiantil
+from .models import Falta, FaltaDisciplinariaEstudiantil, Demerito, DemeritoDeEstudiante
 
 
 class FaltaAdmin(admin.ModelAdmin):
@@ -66,3 +66,5 @@ escuela_admin.register(Falta, FaltaAdmin)
 escuela_admin.register(
     FaltaDisciplinariaEstudiantil, FaltaDisciplinariaEstudiantilAdmin
 )
+escuela_admin.register(Demerito)
+escuela_admin.register(DemeritoDeEstudiante)

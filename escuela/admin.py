@@ -52,6 +52,8 @@ class EscuelaAdmin(admin.AdminSite):
             # Disciplina
             capfirst("faltas"): 1,
             capfirst("Faltas disciplinarias de estudiantes"): 2,
+            capfirst("deméritos"): 3,
+            capfirst("deméritos de estudiantes"): 4,
             #asistencia
             capfirst("asistencias de secciones"): 1,
         }
