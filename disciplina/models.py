@@ -38,7 +38,7 @@ class FaltaDisciplinariaEstudiantil(models.Model):
 
 
 class Demerito(models.Model):
-    codigo = models.PositiveSmallIntegerField(verbose_name="código")
+    codigo = models.CharField(verbose_name="código", max_length=3, unique=True)
     descripcion = models.CharField(verbose_name="descripción", max_length=100)
 
     class Meta:
@@ -46,7 +46,7 @@ class Demerito(models.Model):
         verbose_name_plural = "deméritos"
 
     def __str__(self):
-        return f"{self.codigo - self.descripcion}"
+        return f"{self.codigo} - {self.descripcion}"
 
 
 class DemeritoDeEstudiante(models.Model):
