@@ -761,3 +761,4 @@ def exportar_datos_de_contacto_por_seccion(self, request, queryset):
             )
             response['Content-Disposition'] = f'attachment; filename={zip_filename}'
             return response
+
