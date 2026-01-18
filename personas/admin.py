@@ -275,21 +275,13 @@ class EstudianteAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         
         # Aplicar filtro de retirado si estamos en changelist
-        # Verificar que resolver_match existe antes de acceder
-        if (hasattr(request, 'resolver_match') and 
-            request.resolver_match and 
-            request.resolver_match.url_name == "personas_estudiante_changelist"):
+        if request.resolver_match.url_name == "personas_estudiante_changelist":
             queryset = queryset.filter(retirado=False)
         
         # Solo usar select_related si NO estamos filtrando por estudiantes sin sección
         # matriculado == "2" significa "No matriculado" (sin sección)
         if matriculado != "2":
             queryset = queryset.select_related("seccion__nivel_educativo")
-        
-        # Modificar ordering si se está filtrando por estudiantes sin sección
-        # para evitar LEFT JOIN problemático
-        if matriculado == "2":
-            queryset = queryset.order_by("apellidos", "nombre")
         
         # Siempre aplicar distinct() si hay filtros activos para evitar duplicados
         # causados por el ManyToMany field 'secciones'
