@@ -271,17 +271,6 @@ class EstudianteAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         search = request.GET.get("retirado__exact")
         change = request.GET.get("_changelist_filters")
-        matriculado = request.GET.get("matriculado")
-        
-        # Si el filtro de matriculado está en "No" (sin sección), no usar select_related
-        # para evitar el INNER JOIN que excluiría a estudiantes sin sección
-        if matriculado == "2":
-            queryset = super().get_queryset(request)
-            if request.resolver_match.url_name == "personas_estudiante_changelist":
-                queryset = queryset.filter(retirado=False)
-            return queryset
-        
-        # Para otros casos, usar select_related para optimizar
         if search or change:
             return (
                 super().get_queryset(request).select_related("seccion__nivel_educativo")
