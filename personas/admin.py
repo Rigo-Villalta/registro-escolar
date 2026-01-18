@@ -276,7 +276,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         
         # Si el filtro de matriculado está en "No" (sin sección), no usar select_related
         # para evitar el INNER JOIN que excluiría a estudiantes sin sección
-        if matriculado == "2":
+        if matriculado == "1":
             queryset = super().get_queryset(request)
             if request.resolver_match.url_name == "personas_estudiante_changelist":
                 queryset = queryset.filter(retirado=False)

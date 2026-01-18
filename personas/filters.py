@@ -72,8 +72,6 @@ class MatriculadoFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "1":
-            # Estudiantes con sección asignada (matriculados)
-            return queryset.exclude(seccion__isnull=True).exclude(seccion__exact=None)
+            return queryset.filter(seccion__isnull=False).distinct()
         elif self.value() == "2":
-            # Estudiantes sin sección (no matriculados)
-            return queryset.filter(Q(seccion__isnull=True) | Q(seccion__exact=None))
+            return queryset.filter(seccion__isnull=True).distinct()
