@@ -269,26 +269,31 @@ class EstudianteAdmin(admin.ModelAdmin):
             return super().get_inlines(request, obj)
 
     def get_queryset(self, request):
+        search = request.GET.get("retirado__exact")
+        change = request.GET.get("_changelist_filters")
         matriculado = request.GET.get("matriculado")
         
-        # Obtener el queryset base
-        queryset = super().get_queryset(request)
+        # Si el filtro de matriculado está en "No" (sin sección), no usar select_related
+        # para evitar el INNER JOIN que excluiría a estudiantes sin sección
+        if matriculado == "1":
+            queryset = super().get_queryset(request)
+            if request.resolver_match.url_name == "personas_estudiante_changelist":
+                queryset = queryset.filter(retirado=False)
+            return queryset
         
-        # Aplicar filtro de retirado si estamos en changelist
+        # Para otros casos, usar select_related para optimizar
+        if search or change:
+            return (
+                super().get_queryset(request).select_related("seccion__nivel_educativo")
+            )
         if request.resolver_match.url_name == "personas_estudiante_changelist":
-            queryset = queryset.filter(retirado=False)
-        
-        # Solo usar select_related si NO estamos filtrando por estudiantes sin sección
-        # matriculado == "2" significa "No matriculado" (sin sección)
-        if matriculado != "2":
-            queryset = queryset.select_related("seccion__nivel_educativo")
-        
-        # Siempre aplicar distinct() si hay filtros activos para evitar duplicados
-        # causados por el ManyToMany field 'secciones'
-        if request.GET:
-            queryset = queryset.distinct()
-        
-        return queryset
+            return (
+            super()
+            .get_queryset(request)
+            .select_related("seccion__nivel_educativo")
+            .filter(retirado=False)
+        )
+        return super().get_queryset(request).select_related("seccion__nivel_educativo")
 
     def get_urls(self):
         urls = super().get_urls()
