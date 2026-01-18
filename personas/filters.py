@@ -71,6 +71,6 @@ class MatriculadoFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "1":
-            return queryset.filter(seccion__isnull=False)
+            return queryset.filter(seccion__isnull=False).distinct()
         elif self.value() == "2":
-            return queryset.filter(seccion__isnull=True)
+            return queryset.filter(seccion__isnull=True).distinct()
