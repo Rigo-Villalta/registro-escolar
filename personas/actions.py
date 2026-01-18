@@ -654,3 +654,110 @@ def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion_separadas(
             "Content-Disposition"
         ] = f'attachment; filename=ListaDeEstudiantesYResponsables-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
         return response
+    
+
+def exportar_datos_de_contacto_por_seccion(self, request, queryset):
+    """
+    Acción de Django Admin que exporta a Excel datos de contacto del modelo
+    Estudiante haciendo un libro de excel por cada seccion, 
+    de todos los estudiantes en el queryset. Para exportar todos lo libros estos
+    se guardan en un zip y este zip es el respons
+    Esto se hace haciendo uso de     la librería openpyxl ver: openpyxl.readthedocs.io
+    """
+    import zipfile
+    from django.utils.text import slugify
+    from tempfile import TemporaryDirectory
+
+    with TemporaryDirectory() as temp_dir:
+        zip_filename = f"DatosDeContactoPorSeccion-{datetime.datetime.now().strftime('%Y_%m_%d-%H%M')}.zip"
+        zip_filepath = f"{temp_dir}/{zip_filename}"
+
+        with zipfile.ZipFile(zip_filepath, 'w') as zipf:
+            # Obtener las secciones únicas directamente desde el queryset
+            secciones_ids = set(queryset.values_list('seccion__id', flat=True))
+            
+            for seccion_id in secciones_ids:
+                # Filtrar estudiantes por sección
+                estudiantes_seccion = queryset.filter(seccion__id=seccion_id).select_related("responsable", "seccion")
+                
+                # Verificar si hay estudiantes en esta sección
+                if not estudiantes_seccion.exists():
+                    continue
+                
+                wb = Workbook()
+                ws = wb.active
+                ws.title = "Estudiantes - contactos"
+                ws.append(
+                    [
+                        "Apellidos",
+                        "Nombres",
+                        "NIE",
+                        "Sexo",
+                        "Edad",
+                        "Sección",
+                        "Teléfono 1",
+                        "Teléfono 2",
+                        "Correo Electrónico",
+                        "Nombre de responsable",
+                        "Relación",
+                        "DUI",
+                        "Teléfono 1",
+                        "Teléfono 2",
+                        "Correo Electrónico",
+                    ]
+                )
+                # Obtener la sección del primer estudiante
+                seccion_nombre = None
+                for obj in estudiantes_seccion:
+                    if seccion_nombre is None:
+                        seccion_nombre = obj.seccion.__str__()
+                    
+                    responsable = obj.responsable
+                    if responsable is None:
+                        ws.append(
+                            [
+                                obj.apellidos,
+                                obj.nombre,
+                                obj.nie,
+                                obj.sexo,
+                                obj.edad,
+                                obj.seccion.__str__().title(),
+                                obj.telefono_1,
+                                obj.telefono_2,
+                                obj.correo_electronico,
+                            ]
+                        )
+                    else:
+                        ws.append(
+                            [
+                                obj.apellidos,
+                                obj.nombre,
+                                obj.nie,
+                                obj.sexo,
+                                obj.edad,
+                                obj.seccion.__str__().title(),
+                                obj.telefono_1,
+                                obj.telefono_2,
+                                obj.correo_electronico,
+                                f"{responsable.nombre} {responsable.apellidos}",
+                                obj.get_relacion_de_responsable_display(),
+                                responsable.dui,
+                                responsable.telefono_1,
+                                responsable.telefono_2,
+                                responsable.correo_electronico,
+                            ]
+                        )
+                
+                # Guardar el archivo después de procesar todos los estudiantes de la sección
+                # Usar el ID de la sección para garantizar nombres únicos
+                excel_filename = f"DatosDeContacto_{slugify(seccion_nombre)}.xlsx"
+                excel_filepath = f"{temp_dir}/{excel_filename}"
+                wb.save(excel_filepath)
+                zipf.write(excel_filepath, arcname=excel_filename)
+        with open(zip_filepath, 'rb') as zip_file:
+            response = HttpResponse(
+                zip_file.read(),
+                content_type='application/zip',
+            )
+            response['Content-Disposition'] = f'attachment; filename={zip_filename}'
+            return response
