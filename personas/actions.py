@@ -1,4 +1,5 @@
 import datetime, io
+import openpyxl
 import xlsxwriter
 from tempfile import NamedTemporaryFile
 
@@ -656,7 +657,7 @@ def exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion_separadas(
         return response
     
 
-def exportar_datos_de_contacto_por_seccion(self, request, queryset):
+def exportar_datos_de_contacto_tallaje_por_seccion(self, request, queryset):
     """
     Acción de Django Admin que exporta a Excel datos de contacto del modelo
     Estudiante haciendo un libro de excel por cada seccion, 
@@ -686,7 +687,32 @@ def exportar_datos_de_contacto_por_seccion(self, request, queryset):
                 
                 wb = Workbook()
                 ws = wb.active
+                ws.column_dimensions['A'].width = 23
+                ws.column_dimensions['B'].width = 23
+                ws.column_dimensions['C'].width = 16
+                ws.column_dimensions['D'].width = 11
+                ws.column_dimensions['E'].width = 11
+                ws.column_dimensions['K'].width = 16
+                ws.column_dimensions['L'].width = 16 
+
+                ws.merge_cells('A1:N1')
+                ws['A1'] = 'Complejo Educativo "Dr. Humberto Romero Alvergue"'
+                ws['A1'].alignment = ws['A1'].alignment.copy(horizontal='center', vertical='center')
                 ws.title = "Estudiantes - contactos"
+                ws.merge_cells('A2:N2')
+                ws['A2'] = 'Tallaje de uniformes y calzado de estudiantes'
+                ws['A2'].alignment = ws['A2'].alignment.copy(horizontal='center', vertical='center')
+                ws['A2'].font = ws['A2'].font.copy(size=16)
+                ws.merge_cells('A3:N3')
+                ws['A3'] = f'Sección: {estudiantes_seccion[0].seccion.__str__().title()}'
+                ws['A3'].alignment = ws['A3'].alignment.copy(horizontal='center', vertical='center')
+                ws.append([])
+                ws.merge_cells('A4:N4')
+                ws['A4'] = 'Indicación: A continuación se le proporciona el detalle de contactos de los estudiantes de la sección, para que genere un grupo de WhatsApp de padres de familia, y hacer la consulta de tallas de calzado y uniforme del estudiante, de acuerdo con la clasificación proporcionada. Luego cargar los datos recolectados en el formulario enviado.'
+                ws['A4'].alignment = ws['A4'].alignment.copy(horizontal='center', vertical='center')
+                ws['A4'].alignment = ws['A4'].alignment.copy(wrap_text=True)
+                ws.append([])
+
                 ws.append(
                     [
                         "Apellidos",
@@ -694,18 +720,29 @@ def exportar_datos_de_contacto_por_seccion(self, request, queryset):
                         "NIE",
                         "Sexo",
                         "Edad",
-                        "Sección",
-                        "Teléfono 1",
-                        "Teléfono 2",
-                        "Correo Electrónico",
+                        "Teléfono de estudiante 1",
+                        "Teléfono de estudiante 2",
                         "Nombre de responsable",
                         "Relación",
                         "DUI",
-                        "Teléfono 1",
-                        "Teléfono 2",
-                        "Correo Electrónico",
+                        "Teléfono de responsable 1",
+                        "Teléfono de responsable 2",
+                        "Camisa (Talla)", # esto quedará en blanco para que lo llenen
+                        "Pantalón/Falda (Talla)", # esto quedará en blanco para que lo llenen
+                        "Calzado (Talla)", # esto quedará en blanco para que lo llenen
                     ]
                 )
+                for col in range(1, 16):  # Columnas A a O (1 a 15)
+                    cell = ws.cell(row=6, column=col)
+                    cell.font = cell.font.copy(bold=True)
+                    cell.alignment = cell.alignment.copy(wrap_text=True)
+                    thin_border = openpyxl.styles.Border(
+                        left=openpyxl.styles.Side(style='thin'),
+                        right=openpyxl.styles.Side(style='thin'),
+                        top=openpyxl.styles.Side(style='thin'),
+                        bottom=openpyxl.styles.Side(style='thin')
+                    )
+                    cell.border = thin_border
                 # Obtener la sección del primer estudiante
                 seccion_nombre = None
                 for obj in estudiantes_seccion:
@@ -721,10 +758,8 @@ def exportar_datos_de_contacto_por_seccion(self, request, queryset):
                                 obj.nie,
                                 obj.sexo,
                                 obj.edad,
-                                obj.seccion.__str__().title(),
                                 obj.telefono_1,
                                 obj.telefono_2,
-                                obj.correo_electronico,
                             ]
                         )
                     else:
@@ -735,21 +770,26 @@ def exportar_datos_de_contacto_por_seccion(self, request, queryset):
                                 obj.nie,
                                 obj.sexo,
                                 obj.edad,
-                                obj.seccion.__str__().title(),
                                 obj.telefono_1,
                                 obj.telefono_2,
-                                obj.correo_electronico,
                                 f"{responsable.nombre} {responsable.apellidos}",
                                 obj.get_relacion_de_responsable_display(),
                                 responsable.dui,
                                 responsable.telefono_1,
                                 responsable.telefono_2,
-                                responsable.correo_electronico,
                             ]
                         )
-                
-                # Guardar el archivo después de procesar todos los estudiantes de la sección
-                # Usar el ID de la sección para garantizar nombres únicos
+                    current_row = ws.max_row
+                    for col in range(1, 16): 
+                        cell = ws.cell(row=current_row, column=col)
+                        thin_border = openpyxl.styles.Border(
+                            left=openpyxl.styles.Side(style='thin'),
+                            right=openpyxl.styles.Side(style='thin'),
+                            top=openpyxl.styles.Side(style='thin'),
+                            bottom=openpyxl.styles.Side(style='thin')
+                        )
+                        cell.border = thin_border
+
                 excel_filename = f"DatosDeContacto_{slugify(seccion_nombre)}.xlsx"
                 excel_filepath = f"{temp_dir}/{excel_filename}"
                 wb.save(excel_filepath)
