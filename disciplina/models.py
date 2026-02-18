@@ -68,3 +68,33 @@ class DemeritoDeEstudiante(models.Model):
 
     def __str__(self):
         return f"{self.demerito.descripcion[:50]}..., {self.fecha}"
+
+class Redencion(models.Model):
+    codigo = models.CharField(verbose_name="código", max_length=3, unique=True)
+    descripcion = models.CharField(verbose_name="descripción", max_length=100)
+
+    class Meta:
+        verbose_name = "redención"
+        verbose_name_plural = "redenciones"
+        ordering = ["codigo"]
+
+    def __str__(self):
+        return f"{self.codigo} - {self.descripcion}"
+
+
+class RedencionDeEstudiante(models.Model):
+    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
+    redencion = models.ForeignKey(to=Redencion, on_delete=models.PROTECT)
+    fecha = models.DateField(help_text="Fecha en que se cometió la redención")
+    descripcion = models.CharField(verbose_name="Descripción", max_length=150)
+    periodo_escolar = models.ForeignKey(to=PeriodoEscolar, on_delete=models.PROTECT)
+    docente_que_reporta = models.CharField(
+        max_length=50, verbose_name="Docente que reporta", default=""
+    )
+
+    class Meta:
+        verbose_name = "redención de estudiante"
+        verbose_name_plural = "redenciones de estudiantes"
+
+    def __str__(self):
+        return f"{self.redencion.descripcion[:50]}..., {self.fecha}"

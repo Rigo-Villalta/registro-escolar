@@ -5,7 +5,14 @@ from django.utils.html import format_html
 from escuela.models import PeriodoEscolar
 from escuela.admin import escuela_admin
 
-from .models import Falta, FaltaDisciplinariaEstudiantil, Demerito, DemeritoDeEstudiante
+from .models import (
+    Falta,
+    FaltaDisciplinariaEstudiantil,
+    Demerito,
+    DemeritoDeEstudiante,
+    Redencion,
+    RedencionDeEstudiante,
+)
 
 
 class FaltaAdmin(admin.ModelAdmin):
@@ -45,7 +52,7 @@ class FaltaDisciplinariaEstudiantilInline(admin.TabularInline):
             .get_queryset(request)
             .filter(fecha__gt=periodo_escolar_activo.fecha_de_inicio)
         )
-    
+
     def ver(self, instance):
         """
         Agregamos un campo que enlaza a el Admin Change View
@@ -63,6 +70,12 @@ class DemeritoDeEstudianteAdmin(admin.ModelAdmin):
     model = DemeritoDeEstudiante
     autocomplete_fields = ["estudiante"]
 
+
+class RedencionDeEstudianteAdmin(admin.ModelAdmin):
+    model = RedencionDeEstudiante
+    autocomplete_fields = ["estudiante"]
+
+
 admin.site.register(Falta, FaltaAdmin)
 admin.site.register(FaltaDisciplinariaEstudiantil, FaltaDisciplinariaEstudiantilAdmin)
 
@@ -72,3 +85,5 @@ escuela_admin.register(
 )
 escuela_admin.register(Demerito)
 escuela_admin.register(DemeritoDeEstudiante, DemeritoDeEstudianteAdmin)
+escuela_admin.register(Redencion)
+escuela_admin.register(RedencionDeEstudiante, RedencionDeEstudianteAdmin)
