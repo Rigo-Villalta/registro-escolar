@@ -9,7 +9,11 @@ from django_admin_listfilter_dropdown.filters import (
     ChoiceDropdownFilter,
 )
 
-from disciplina.admin import FaltaDisciplinariaEstudiantilInline
+from disciplina.admin import (
+    FaltaDisciplinariaEstudiantilInline,
+    DemeritoDeEstudianteInline,
+    RedencionDeEstudianteInline,
+)
 from disciplina.models import FaltaDisciplinariaEstudiantil
 from escuela.admin import escuela_admin
 
@@ -264,7 +268,12 @@ class EstudianteAdmin(admin.ModelAdmin):
 
     def get_inlines(self, request, obj=None):
         if obj:
-            return [FaltaDisciplinariaEstudiantilInline, SeccionInline]
+            return [
+                FaltaDisciplinariaEstudiantilInline,
+                DemeritoDeEstudianteInline,
+                RedencionDeEstudianteInline,
+                SeccionInline,
+            ]
         else:
             return super().get_inlines(request, obj)
 
@@ -313,17 +322,17 @@ class EstudianteAdmin(admin.ModelAdmin):
         return TemplateResponse(
             request, "disciplina/historial_disciplinario_del_estudiante.html", context
         )
-    
+
     def telefono_de_responsable_1(self, obj):
         if obj.responsable.telefono_1 is None:
             return "--"
         return obj.responsable.telefono_1
-    
+
     def telefono_de_responsable_2(self, obj):
         if obj.responsable.telefono_2 is None:
             return "--"
         return obj.responsable.telefono_2
-    
+
     telefono_de_responsable_1.short_description = "Teléfono de responsable 1"
     telefono_de_responsable_2.short_description = "Teléfono de responsable 2"
 

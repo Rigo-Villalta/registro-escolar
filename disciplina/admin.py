@@ -42,7 +42,77 @@ class FaltaDisciplinariaEstudiantilInline(admin.TabularInline):
     def has_add_permission(self, request, obj):
         return False
 
-    def has_delete_permission(self, request, obj):
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_queryset(self, request):
+        periodo_escolar_activo = PeriodoEscolar.objects.get(periodo_activo=True)
+        return (
+            super()
+            .get_queryset(request)
+            .filter(fecha__gt=periodo_escolar_activo.fecha_de_inicio)
+        )
+
+    def ver(self, instance):
+        """
+        Agregamos un campo que enlaza a el Admin Change View
+        de el objeto.
+        """
+        url = reverse(
+            "escuela_admin:%s_%s_change"
+            % (instance._meta.app_label, instance._meta.model_name),
+            args=(instance.pk,),
+        )
+        return format_html('<a class="viewlink" href="{}">Ver</a>', url)
+
+
+class DemeritoDeEstudianteInline(admin.TabularInline):
+    model = DemeritoDeEstudiante
+    fields = ["ver", "demerito", "descripcion", "fecha"]
+    readonly_fields = ["ver", "demerito", "descripcion", "fecha"]
+    extra = 0
+    show_change_link = True
+    verbose_name_plural = "Demeritos cometidas por el estudiante"
+
+    def has_add_permission(self, request, obj):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_queryset(self, request):
+        periodo_escolar_activo = PeriodoEscolar.objects.get(periodo_activo=True)
+        return (
+            super()
+            .get_queryset(request)
+            .filter(fecha__gt=periodo_escolar_activo.fecha_de_inicio)
+        )
+
+    def ver(self, instance):
+        """
+        Agregamos un campo que enlaza a el Admin Change View
+        de el objeto.
+        """
+        url = reverse(
+            "escuela_admin:%s_%s_change"
+            % (instance._meta.app_label, instance._meta.model_name),
+            args=(instance.pk,),
+        )
+        return format_html('<a class="viewlink" href="{}">Ver</a>', url)
+
+
+class RedencionDeEstudianteInline(admin.TabularInline):
+    model = RedencionDeEstudiante
+    fields = ["ver", "redencion", "descripcion", "fecha"]
+    readonly_fields = ["ver", "redencion", "descripcion", "fecha"]
+    extra = 0
+    show_change_link = True
+    verbose_name_plural = "redencion realizadas por el estudiante"
+
+    def has_add_permission(self, request, obj):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
         return False
 
     def get_queryset(self, request):
