@@ -1,6 +1,6 @@
 *.pyc
 *.vscode
-*.sqlite3
+*.sqlite*
 *.backup
 settings_local.py
 log.txt
