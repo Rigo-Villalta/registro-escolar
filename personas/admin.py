@@ -25,7 +25,8 @@ from .actions import (
     exportar_a_excel_estudiantes_y_responsables_por_seccion,
     exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
     exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion_separadas,
-    exportar_datos_de_contacto_tallaje_por_seccion
+    exportar_datos_de_contacto_tallaje_por_seccion,
+    exportar_a_excel_estudiantes_y_responsables_por_familia_en_hojas_por_seccion,
 )
 from .filters import SeccionFilter, NivelEducativoFilter, MatriculadoFilter
 from .models import (
@@ -239,6 +240,7 @@ class EstudianteAdmin(admin.ModelAdmin):
         exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion,
         exportar_a_excel_estudiantes_y_responsables_por_familia_y_seccion_separadas,
         exportar_datos_de_contacto_tallaje_por_seccion,
+        exportar_a_excel_estudiantes_y_responsables_por_familia_en_hojas_por_seccion,
     ]
     readonly_fields = ["telefono_de_responsable_1", "telefono_de_responsable_2"]
 

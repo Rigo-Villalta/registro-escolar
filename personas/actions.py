@@ -802,3 +802,175 @@ def exportar_datos_de_contacto_tallaje_por_seccion(self, request, queryset):
             response['Content-Disposition'] = f'attachment; filename={zip_filename}'
             return response
 
+
+def exportar_a_excel_estudiantes_y_responsables_por_familia_en_hojas_por_seccion(
+    self, request, queryset
+):
+    """
+    Acción que toma un queryset de Estudiantes y exporta
+    a excel las columnas: Responsable, DUI de responsable,
+    estudiante y sección del estudiante, ordenados en primer
+    lugar por sección, pero con familias en conjunto, es decir
+    el primer niño de kinder 3 es el primero, si tiene hermanos
+    luego ellos, luego el segundo niño de kinder 3 y sus hermanos y así
+    sucesivamente, estos hermanos ya no aparecen en su repectiva seccion.
+    Cada sección se exporta en una hoja (worksheet) separada.
+    Hacemos uso de la librería openpyxl ver: openpyxl.readthedocs.io
+    """
+    from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+
+    thin = Side(style="thin")
+    cell_border = Border(left=thin, right=thin, top=thin, bottom=thin)
+    header_fill = PatternFill(fill_type="solid", fgColor="BBBBBB")
+    alt_fill = PatternFill(fill_type="solid", fgColor="EFEFEF")
+
+    def _nueva_hoja(wb, ws_prev, titulo):
+        if ws_prev is None:
+            ws = wb.active
+            ws.title = titulo
+        else:
+            ws = wb.create_sheet(title=titulo)
+
+        # Configuración de página: carta horizontal
+        ws.page_setup.orientation = "landscape"
+        ws.page_setup.paperSize = ws.PAPERSIZE_LETTER
+        ws.page_setup.fitToPage = True
+        ws.page_setup.fitToWidth = 1
+        ws.page_setup.fitToHeight = 0
+        ws.sheet_properties.pageSetUpPr.fitToPage = True
+        ws.page_margins.left = 0.5
+        ws.page_margins.right = 0.5
+        ws.page_margins.top = 0.75
+        ws.page_margins.bottom = 0.75
+
+        # Anchos distribuidos para carta horizontal (~10" imprimible)
+        ws.column_dimensions["A"].width = 5    # #
+        ws.column_dimensions["B"].width = 30   # Responsable
+        ws.column_dimensions["C"].width = 12   # DUI
+        ws.column_dimensions["D"].width = 30   # Estudiante
+        ws.column_dimensions["E"].width = 24   # Sección
+        ws.column_dimensions["F"].width = 30   # Firma
+
+        # Fila 1: nombre del centro educativo
+        ws.merge_cells("A1:F1")
+        ws["A1"] = 'COMPLEJO EDUCATIVO "DR. HUMBERTO ROMERO ALVERGUE"'
+        ws["A1"].font = Font(bold=True, size=12)
+        ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[1].height = 20
+
+        # Fila 2: evento
+        ws.merge_cells("A2:F2")
+        ws["A2"] = "(Evento)"
+        ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[2].height = 16
+
+        # Fila 3: fechas
+        ws.merge_cells("A3:F3")
+        ws["A3"] = "Fechas: DD/MM/AAA"
+        ws["A3"].alignment = Alignment(horizontal="left", vertical="center")
+        ws.row_dimensions[3].height = 16
+
+        # Fila 4: vacía
+        ws.append([])
+
+        # Fila 5: encabezados de columna
+        ws.append(["#", "Responsable", "DUI de responsable", "Estudiante", "Sección", "Firma"])
+        for col in range(1, 7):
+            cell = ws.cell(row=5, column=col)
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.border = cell_border
+            cell.fill = header_fill
+        ws.row_dimensions[5].height = 20
+        return ws
+
+    def _estilo_fila(ws, row_num, alternate=False):
+        for col in range(1, 7):
+            cell = ws.cell(row=row_num, column=col)
+            cell.border = cell_border
+            cell.alignment = Alignment(vertical="center")
+            if alternate:
+                cell.fill = alt_fill
+        ws.row_dimensions[row_num].height = 18
+
+    # optimización del queryset para los datos
+    # de responsable relacionados y ordenados
+    # para ello pasamos el query a values
+    estudiantes = (
+        queryset.select_related("responsable")
+        .order_by("seccion__nivel_educativo", "seccion", "apellidos", "nombre")
+        .values(
+            "responsable__id",
+            "responsable__apellidos",
+            "responsable__nombre",
+            "responsable__dui",
+            "apellidos",
+            "nombre",
+            "seccion__seccion",
+            "seccion__nivel_educativo__nivel"
+        )
+    )
+    wb = Workbook()
+    ws = None
+
+    # el algoritmo para encontrar otros estudiantes del mismo
+    # responsable se hace a nivel de Python y no ORM
+    responsables_usados = []
+    count = 0
+    seccion = []
+    contador_seccion = 1
+    data_row_count = 0
+    for estudiante in estudiantes:
+        if seccion != [estudiante['seccion__nivel_educativo__nivel'], estudiante['seccion__seccion']]:
+            titulo_hoja = f"{estudiante['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}"
+            ws = _nueva_hoja(wb, ws, titulo_hoja)
+            seccion = [estudiante['seccion__nivel_educativo__nivel'], estudiante['seccion__seccion']]
+            contador_seccion = 1
+            data_row_count = 0
+        if estudiante["responsable__id"] in responsables_usados:
+            count += 1
+        else:
+            ws.append(
+                [
+                    f"{contador_seccion}",
+                    f"{estudiante['responsable__apellidos']}, {estudiante['responsable__nombre']}",
+                    estudiante["responsable__dui"],
+                    f"{estudiante['apellidos']}, {estudiante['nombre']}",
+                    f"{estudiante['seccion__nivel_educativo__nivel']} {estudiante['seccion__seccion']}",
+                    "",
+                ]
+            )
+            data_row_count += 1
+            _estilo_fila(ws, ws.max_row, data_row_count % 2 == 0)
+            contador_seccion += 1
+            for estudiante_b in estudiantes[count + 1 :]:
+                if estudiante["responsable__id"] == estudiante_b["responsable__id"]:
+                    ws.append(
+                        [
+                            "",
+                            f"{estudiante_b['responsable__apellidos']}, {estudiante_b['responsable__nombre']}",
+                            estudiante_b["responsable__dui"],
+                            f"{estudiante_b['apellidos']}, {estudiante_b['nombre']}",
+                            f"{estudiante_b['seccion__nivel_educativo__nivel']} {estudiante_b['seccion__seccion']}",
+                            "",
+                        ]
+                    )
+                    data_row_count += 1
+                    _estilo_fila(ws, ws.max_row, data_row_count % 2 == 0)
+            responsables_usados.append(estudiante["responsable__id"])
+            count += 1
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+
+        response = HttpResponse(
+            content=stream,
+            content_type="application/ms-excel",
+        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename=ListaDeEstudiantesYResponsablesPorHoja-{datetime.datetime.now().strftime("%Y_%m_%d-%H%M")}.xlsx'
+        return response
+
